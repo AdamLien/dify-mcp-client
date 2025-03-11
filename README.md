@@ -29,7 +29,7 @@ Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`
 > ReAct while loop is as they are
 
 
-## Useful GitHub branch for developers
+## Useful GitHub repositories for developers
 
 #### Dify Plugin SDKs
 https://github.com/langgenius/dify-plugin-sdks
@@ -48,11 +48,25 @@ https://github.com/modelcontextprotocol/python-sdk
 
 ## Before Start
 > [!CAUTION]
-> This plugin does **not** implement a **human-in-the-loop** mechanism by default, so connect **only reliable mcp server**.<br>
-> To avoid it, decrease `max itereations`(default:`3`) to `1`, and use it repeatedly in Chatflow.<br>
-> Don't forget to add a phrase such as <br>
+> This plugin does **not** implement a **human-in-the-loop** mechanism by default, so connect **reliable mcp server only**.<br>
+> To avoid it, decrease `max itereations`(default:`3`) to `1`, and use this Agent node repeatedly in Chatflow.<br>
+> However, agent memory is reset by the end of Workflow, so use `Conversaton Variable` to save history and pass to QUERY.  
+> Don't forget to add a phrase such as
 > *"ask for user's permission when calling tools"* in INSTRUCTION.
 
 > [!WARNING]
 > - The Tools field should not be left blank. so **select Dify tools** like "current time".
 > - The SSE connection is not supported
+
+## How to use plugin
+
+### Install plugin from GitHub (Easy)
+- Dify > PLUGINS > + Install plugin > INSTALL FROM > GitHub
+- GitHub repository https://github.com/3dify-project/dify-mcp-client/
+![difyUI1](./_assets/plugin_install_online.png)
+
+### Install plugin from GitHub ()
+- Go to Releases https://github.com/3dify-project/dify-mcp-client/releases
+- Select suitable version of `.difypkg`
+- Dify > PLUGINS > + Install plugin > INSTALL FROM > Local Package File
+![difyUI2](./_assets/plugin_install_offline.png)
