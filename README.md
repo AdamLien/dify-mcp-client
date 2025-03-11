@@ -13,7 +13,7 @@ Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`
 
 > [!NOTE]
 > Most of the code in this repository contains the following files.
-> #### Dify Official Plugins
+> #### Dify Official Plugins / Agent Strategies
 > https://github.com/langgenius/dify-official-plugins/tree/main/agent-strategies/cot_agent
 
 ## What I did
@@ -27,6 +27,81 @@ Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`
 - MCP setup and cleanup in `_invoke()`
 > [!IMPORTANT]
 > ReAct while loop is as they are
+
+
+
+
+## Caution and Limitation
+> [!CAUTION]
+> This plugin does **not** implement a **human-in-the-loop** mechanism by default, so connect **reliable mcp server only**.<br>
+> To avoid it, decrease `max itereations`(default:`3`) to `1`, and use this Agent node repeatedly in Chatflow.<br>
+> However, agent memory is reset by the end of Workflow, so use `Conversaton Variable` to save history and pass to QUERY.  
+> Don't forget to add a phrase such as
+> *"ask for user's permission when calling tools"* in INSTRUCTION.
+
+> [!WARNING]
+> - The Tools field should not be left blank. so **select Dify tools** like "current time".
+> - The SSE connection is not supported
+
+# How to use plugin
+
+### Install plugin from GitHub
+- Enter following GitHub repository name
+```
+https://github.com/3dify-project/dify-mcp-client/
+```
+- Dify > PLUGINS > + Install plugin > INSTALL FROM > GitHub
+![difyUI1](./_assets/plugin_install_online.png)
+
+### Install plugin from .difypkg file
+- Go to Releases https://github.com/3dify-project/dify-mcp-client/releases
+- Select suitable version of `.difypkg`
+- Dify > PLUGINS > + Install plugin > INSTALL FROM > Local Package File
+![difyUI2](./_assets/plugin_install_offline.png)
+
+
+# How to develop or debug plugin
+https://docs.dify.ai/plugins/quick-start/develop-plugins/initialize-development-tools
+
+### Dify plugin SDK deamon
+In my case, (developing from scratch on Windows11)<br>
+download dify-plugin-windows-amd64.exe (v0.0.3)<br>
+https://github.com/langgenius/dify-plugin-daemon/releases <br>
+Rename it as dify.exe
+
+> [!NOTE]
+> You can skip this stage
+> ```
+> dify plugin init
+> ```
+image here
+
+### Install python module
+Python3.12+ is compatible. Dify plugin official installation guide use pip, but I used uv.
+```
+uv init --python=python3.12
+.venv\Scripts\activate
+```
+install python modules for plugin development
+```
+uv add werkzeug==3.0.3
+uv add flask
+uv add dify_plugin
+```
+
+### copy and rename env.example to .env
+I changed `REMOTE_INSTALL_HOST` from `debug.dify.ai` to `localhost` 
+(Docker Compose environment)
+click bug icon button to see these infomation
+
+### Activate Dify plugin
+```
+python -m main
+```
+(ctrl+C to stop)
+> [!TIP]
+> REMOTE_INSTALL_KEY of .env often changes.
+> If you encounter error messages like `handshake failed, invalid key`, renew it.
 
 
 ## Useful GitHub repositories for developers
@@ -45,28 +120,3 @@ https://github.com/modelcontextprotocol/python-sdk
 > [!NOTE]
 > Dify plugin has `requirements.txt` which automatically installs python modules.<br>
 > I include `mcp` in it, so you don't need to download the MCP SDK separately.
-
-## Before Start
-> [!CAUTION]
-> This plugin does **not** implement a **human-in-the-loop** mechanism by default, so connect **reliable mcp server only**.<br>
-> To avoid it, decrease `max itereations`(default:`3`) to `1`, and use this Agent node repeatedly in Chatflow.<br>
-> However, agent memory is reset by the end of Workflow, so use `Conversaton Variable` to save history and pass to QUERY.  
-> Don't forget to add a phrase such as
-> *"ask for user's permission when calling tools"* in INSTRUCTION.
-
-> [!WARNING]
-> - The Tools field should not be left blank. so **select Dify tools** like "current time".
-> - The SSE connection is not supported
-
-## How to use plugin
-
-### Install plugin from GitHub (Easy)
-- Dify > PLUGINS > + Install plugin > INSTALL FROM > GitHub
-- GitHub repository https://github.com/3dify-project/dify-mcp-client/
-![difyUI1](./_assets/plugin_install_online.png)
-
-### Install plugin from GitHub ()
-- Go to Releases https://github.com/3dify-project/dify-mcp-client/releases
-- Select suitable version of `.difypkg`
-- Dify > PLUGINS > + Install plugin > INSTALL FROM > Local Package File
-![difyUI2](./_assets/plugin_install_offline.png)
