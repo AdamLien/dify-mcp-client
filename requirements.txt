@@ -1,0 +1,4 @@
+dify_plugin~=0.0.1b67
+uvicorn
+sse_starlette
+mcp
