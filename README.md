@@ -3,23 +3,25 @@
 > [!IMPORTANT]
 > Dify is not `MCP Server` but `MCP Host`. 
 
+![showcase](./_assets/arxiv_mcp_server_test.png)
+
 ## How it works
 Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`.
 1.  `Tool`, `Resource`, `Prompt` lists are converted into Dify Tools.
 2.   Your selected LLM can see their `name`, `description`, `argument type`
-3.   LLM calls Tools based on ReAct (Reason -> Act -> Observe Loop)
+3.   The LLM calls Tools based on the ReAct loop (Reason → Act → Observe).
 
 > [!NOTE]
-> Most codes in this repository contains following files.
-> #### Dify Officail Plugins
+> Most of the code in this repository contains the following files.
+> #### Dify Official Plugins
 > https://github.com/langgenius/dify-official-plugins/tree/main/agent-strategies/cot_agent
 
-## What I did (=no deleted, just added codes)
-- copy `ReAct.py` and rename file as `mcpReAct.py`
-- `config_json` GUI input by editing `mcpReAct.yaml` and `class mcpReActParams()` 
+## What I did
+- Copied `ReAct.py` and renamed file as `mcpReAct.py`
+- add `config_json` GUI input field by editing `mcpReAct.yaml` and `class mcpReActParams()` 
 
-#### in `mcpReAct.py`, I added
-- new 12 class methods for MCP 
+### in mcpReAct.py, I added
+- new 12 functions for MCP 
 - `__init__()` for initializing `AsyncExitStack` and `event loop`
 - some codes in `_handle_invoke_action()` for MCP 
 - MCP `setup` and `cleanup` in `_invoke()`
@@ -27,9 +29,9 @@ Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`
 > ReAct while loop is as they are
 
 
-## useful GitHub branch for developer
+## Useful GitHub branch for developers
 
-#### Dify Plugin SDKs (Python)
+#### Dify Plugin SDKs
 https://github.com/langgenius/dify-plugin-sdks
 
 #### MCP Python SDK
@@ -42,14 +44,15 @@ https://github.com/modelcontextprotocol/python-sdk
 
 > [!NOTE]
 > Dify plugin has `requirements.txt` which automatically installs python modules.<br>
-> I write `mcp` in it, so you don't need to download MCP SDK.
+> I include `mcp` in it, so you don't need to download the MCP SDK separately.
 
 ## Before Start
 > [!CAUTION]
-> **No** `human in the loop` in this plugin, so connect **only reliable mcp server**.<br>
+> This plugin does **not** implement a **human-in-the-loop** mechanism by default, so connect **only reliable mcp server**.<br>
 > To avoid it, decrease `max itereations`(default:`3`) to `1`, and use it repeatedly in Chatflow.<br>
-> Don't forget to add a phrase such as *"ask for user's permission when calling tools"* in system prompt.
+> Don't forget to add a phrase such as <br>
+> *"ask for user's permission when calling tools"* in the system prompt.
 
 > [!WARNING]
-> - Tools field shouldn't be blank. so I recommend you to **select built-in Dify plugin** like "current time".
-> - `sse` connention doesn't support
+> - The Tools field should not be left blank. so I recommend you to **select built-in Dify plugin** like "current time".
+> - The SSE connection is not supported
