@@ -18,13 +18,13 @@ Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`
 
 ## What I did
 - Copied `ReAct.py` and renamed file as `mcpReAct.py`
-- add `config_json` GUI input field by editing `mcpReAct.yaml` and `class mcpReActParams()` 
+- Added `config_json` GUI input field by editing `mcpReAct.yaml` and `class mcpReActParams()` 
 
 ### in mcpReAct.py, I added
-- new 12 functions for MCP 
+- New 12 functions for MCP 
 - `__init__()` for initializing `AsyncExitStack` and `event loop`
-- some codes in `_handle_invoke_action()` for MCP 
-- MCP `setup` and `cleanup` in `_invoke()`
+- Some codes in `_handle_invoke_action()` for MCP 
+- MCP setup and cleanup in `_invoke()`
 > [!IMPORTANT]
 > ReAct while loop is as they are
 
@@ -51,8 +51,8 @@ https://github.com/modelcontextprotocol/python-sdk
 > This plugin does **not** implement a **human-in-the-loop** mechanism by default, so connect **only reliable mcp server**.<br>
 > To avoid it, decrease `max itereations`(default:`3`) to `1`, and use it repeatedly in Chatflow.<br>
 > Don't forget to add a phrase such as <br>
-> *"ask for user's permission when calling tools"* in the system prompt.
+> *"ask for user's permission when calling tools"* in INSTRUCTION.
 
 > [!WARNING]
-> - The Tools field should not be left blank. so I recommend you to **select built-in Dify plugin** like "current time".
+> - The Tools field should not be left blank. so **select Dify tools** like "current time".
 > - The SSE connection is not supported
