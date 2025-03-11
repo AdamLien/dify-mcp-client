@@ -1,0 +1,65 @@
+identity:
+  name: mcpReAct
+  author: 3dify
+  label:
+    en_US: mcpReAct
+    zh_Hans: mcpReAct
+    pt_BR: mcpReAct
+description:
+  en_US: mcpReAct is a basic strategy for agent, model will use the tools provided to perform the task. This node is MCP client that can connect to a MCP server. Dify is regarded as Host (not MCP server).
+  zh_Hans: mcpReAct 是一个基本的 Agent 策略，模型将使用提供的工具来执行任务。
+  pt_BR: mcpReAct is a basic strategy for agent, model will use the tools provided to perform the task. This node is MCP client that can connect to a MCP server. Dify is regarded as Host (not MCP server).
+parameters:
+  - name: model
+    type: model-selector
+    scope: tool-call&llm
+    required: true
+    label:
+      en_US: Model
+      zh_Hans: 模型
+      pt_BR: Model
+  - name: config_json
+    type: string
+    required: true
+    label:
+      en_US: Commands to awake each MCP servers (claude_desktop_config.json)
+      zh_Hans: 唤醒每个 MCP 服务器的命令（claude_desktop_config.json）
+      pt_BR: Commands to awake each MCP servers (claude_desktop_config.json)
+  - name: tools
+    type: array[tools]
+    required: false
+    label:
+      en_US: Tools list
+      zh_Hans: 工具列表
+      pt_BR: Tools list
+  - name: instruction
+    type: string
+    required: true
+    label:
+      en_US: Instruction
+      zh_Hans: 指令
+      pt_BR: Instruction
+    auto_generate:
+      type: prompt_instruction
+    template:
+      enabled: true
+  - name: query
+    type: string
+    required: true
+    label:
+      en_US: Query
+      zh_Hans: 查询
+      pt_BR: Query
+  - name: maximum_iterations
+    type: number
+    required: true
+    label:
+      en_US: Maxium Iterations
+      zh_Hans: 最大迭代次数
+      pt_BR: Maxium Iterations
+    default: 3
+    min: 1
+    max: 30
+extra:
+  python:
+    source: strategies/mcpReAct.py
