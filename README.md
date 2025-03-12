@@ -78,7 +78,7 @@ https://docs.dify.ai/plugins/quick-start/develop-plugins/initialize-development-
 > ```
 > dify plugin init
 > ```
-![InitialDifyPluginSetting](initial_mcp_plugin_settings.png)
+![InitialDifyPluginSetting](./_assets/initial_mcp_plugin_settings.png)
 
 ### Install python module
 Python3.12+ is compatible. Dify plugin official installation guide use pip, but I used uv.
@@ -93,7 +93,7 @@ uv add flask
 uv add dify_plugin
 ```
 
-### copy and rename env.example to .env
+### Copy and rename env.example to .env
 I changed `REMOTE_INSTALL_HOST` from `debug.dify.ai` to `localhost` 
 (Docker Compose environment)
 click bug icon button to see these infomation
