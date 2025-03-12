@@ -1,6 +1,6 @@
 version: 0.0.1
 type: plugin
-author: 3dify
+author: 3dify-project
 name: mcp_client
 label:
   en_US: mcp_client
