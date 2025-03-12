@@ -61,20 +61,24 @@ https://github.com/3dify-project/dify-mcp-client/
 
 
 # How to develop or debug plugin
-https://docs.dify.ai/plugins/quick-start/develop-plugins/initialize-development-tools
+
+### General plugin dev guide
+https://github.com/3dify-project/dify-mcp-client/blob/main/GUIDE.md
 
 ### Dify plugin SDK deamon
 In my case, (developing from scratch on Windows11)<br>
 download dify-plugin-windows-amd64.exe (v0.0.3)<br>
 https://github.com/langgenius/dify-plugin-daemon/releases <br>
 Rename it as dify.exe
+#### Reference  
+https://docs.dify.ai/plugins/quick-start/develop-plugins/initialize-development-tools
 
 > [!NOTE]
-> You can skip this stage
+> You can skip this stage if you pull or download codes of this repo
 > ```
 > dify plugin init
 > ```
-image here
+![InitialDifyPluginSetting](initial_mcp_plugin_settings.png)
 
 ### Install python module
 Python3.12+ is compatible. Dify plugin official installation guide use pip, but I used uv.
@@ -93,6 +97,16 @@ uv add dify_plugin
 I changed `REMOTE_INSTALL_HOST` from `debug.dify.ai` to `localhost` 
 (Docker Compose environment)
 click bug icon button to see these infomation
+
+### Change directory
+```
+cd mcp_client
+```
+
+### Do Once
+```
+pip install requirement.txt
+```
 
 ### Activate Dify plugin
 ```
