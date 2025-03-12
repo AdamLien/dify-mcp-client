@@ -3,7 +3,7 @@
 > [!IMPORTANT]
 > Dify is not `MCP Server` but `MCP Host`. 
 
-![showcase](./_assets/arxiv_mcp_server_test.png)
+![showcase1](./_assets/arxiv_mcp_server_test.png)
 
 ## How it works
 Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`.
@@ -45,19 +45,46 @@ Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`
 
 # How to use plugin
 
-### Install plugin from GitHub
-- Enter following GitHub repository name
+### Install plugin from GitHub (online)
+- Enter the following GitHub repository name
 ```
 https://github.com/3dify-project/dify-mcp-client/
 ```
 - Dify > PLUGINS > + Install plugin > INSTALL FROM > GitHub
 ![difyUI1](./_assets/plugin_install_online.png)
 
-### Install plugin from .difypkg file
+### Install plugin from .difypkg file (offline)
 - Go to Releases https://github.com/3dify-project/dify-mcp-client/releases
 - Select suitable version of `.difypkg`
 - Dify > PLUGINS > + Install plugin > INSTALL FROM > Local Package File
 ![difyUI2](./_assets/plugin_install_offline.png)
+
+## Compatible claude_desktop_config.json
+MCP Agent Plugin node require config_json like this to command to awake an MCP server
+```
+{
+    "mcpservers":
+    {
+        "name_of_mcpserver":
+        {
+            "command": "npx",
+            "args": ["arg1", "arg2"]
+        },
+     }
+}
+```
+> [!WARNING]
+> - Currently support one MCP server one Agent plugin node
+> - `npx.cmd` instead of `npx` if you use Windows
+
+## Chatflow Example
+![showcase2](./_assets/everything_mcp_server_test_resource.png)
+#### I provide this Dify ChatFlow for testing dify mcp plugin as .yml.
+https://github.com/3dify-project/dify-mcp-client/tree/main/test/chatflow
+#### After download DSL(yml) file, import it in Dify and you can test MCP using "Everything MCP server"
+https://github.com/modelcontextprotocol/servers/tree/main/src/everything
+
+
 
 
 # How to develop or debug plugin
@@ -65,11 +92,12 @@ https://github.com/3dify-project/dify-mcp-client/
 ### General plugin dev guide
 https://github.com/3dify-project/dify-mcp-client/blob/main/GUIDE.md
 
-### Dify plugin SDK deamon
-In my case, (developing from scratch on Windows11)<br>
-download dify-plugin-windows-amd64.exe (v0.0.3)<br>
+### Dify plugin SDK daemon
+In my case (Windows 11) ,need to download dify-plugin-windows-amd64.exe (v0.0.3)<br>
+Choose your OS-compatible verson at here:<br>
 https://github.com/langgenius/dify-plugin-daemon/releases <br>
 Rename it as dify.exe
+
 #### Reference  
 https://docs.dify.ai/plugins/quick-start/develop-plugins/initialize-development-tools
 
@@ -78,7 +106,8 @@ https://docs.dify.ai/plugins/quick-start/develop-plugins/initialize-development-
 > ```
 > dify plugin init
 > ```
-![InitialDifyPluginSetting](./_assets/initial_mcp_plugin_settings.png)
+> Initial settings are as follow 
+> ![InitialDifyPluginSetting](./_assets/initial_mcp_plugin_settings.png)
 
 ### Install python module
 Python3.12+ is compatible. Dify plugin official installation guide use pip, but I used uv.
@@ -86,7 +115,7 @@ Python3.12+ is compatible. Dify plugin official installation guide use pip, but 
 uv init --python=python3.12
 .venv\Scripts\activate
 ```
-install python modules for plugin development
+Install python modules for plugin development
 ```
 uv add werkzeug==3.0.3
 uv add flask
@@ -96,7 +125,7 @@ uv add dify_plugin
 ### Copy and rename env.example to .env
 I changed `REMOTE_INSTALL_HOST` from `debug.dify.ai` to `localhost` 
 (Docker Compose environment)
-click bug icon button to see these infomation
+click bug icon button to see these information
 
 ### Change directory
 ```
@@ -105,7 +134,7 @@ cd mcp_client
 
 ### Do Once
 ```
-pip install requirement.txt
+pip install -r requirements.txt
 ```
 
 ### Activate Dify plugin
