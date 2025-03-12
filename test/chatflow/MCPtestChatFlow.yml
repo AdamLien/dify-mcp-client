@@ -1,0 +1,420 @@
+app:
+  description: 'Test for MCP client as Dify Agent Strategy plugin.
+
+    used "Everything MCP server"
+
+    Resource and Prompt are working correctly.
+
+    Tool also Succussed, except for "samplingLLM", "annotatedMessage"'
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: advanced-chat
+  name: MCP test
+  use_icon_as_answer_icon: true
+dependencies: []
+kind: app
+version: 0.1.5
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        sourceType: start
+        targetType: agent
+      id: 1741367649354-source-1741765826830-target
+      source: '1741367649354'
+      sourceHandle: source
+      target: '1741765826830'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: agent
+        targetType: answer
+      id: 1741765826830-source-answer-target
+      source: '1741765826830'
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: Start
+        type: start
+        variables: []
+      height: 53
+      id: '1741367649354'
+      position:
+        x: 87.25729350925093
+        y: 282
+      positionAbsolute:
+        x: 87.25729350925093
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        answer: '{{#1741367691327.text#}}'
+        desc: ''
+        selected: false
+        title: Answer
+        type: answer
+        variables: []
+      height: 101
+      id: answer
+      position:
+        x: 627.4767826811337
+        y: 282
+      positionAbsolute:
+        x: 627.4767826811337
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        author: 3Dify-developer
+        desc: ''
+        height: 351
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"font-size:
+          16px;","text":"Mac ","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"config.json example","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":1,"textStyle":"font-size:
+          16px;"},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"{","type":"text","version":1}],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"  \"mcpServers\":
+          {","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"    \"everything\":
+          {","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"      \"command\":
+          \"npx\",","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"      \"args\":
+          [","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"        \"-y\",","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"        \"@modelcontextprotocol/server-everything\"","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"      ]","type":"text","version":1}],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"    }","type":"text","version":1}],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"  }","type":"text","version":1}],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"}","type":"text","version":1}],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: pink
+        title: ''
+        type: ''
+        width: 289
+      height: 351
+      id: '1741579814015'
+      position:
+        x: 973.6650449303346
+        y: 610.9646610182883
+      positionAbsolute:
+        x: 973.6650449303346
+        y: 610.9646610182883
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 289
+    - data:
+        author: 3Dify-developer
+        desc: ''
+        height: 194
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"font-size:
+          16px;","text":"User prompt base","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":1,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"I''m developing MCP client as Dify Agent Strategy Plugin.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"- Some features haven''t implemented and might not work as
+          I expected.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"- I found good MCP server for testing.","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"- You should ignore \"Current Time Tool\". ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":"font-size:
+          16px;"},{"children":[],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: blue
+        title: ''
+        type: ''
+        width: 569
+      height: 194
+      id: '1741624678131'
+      position:
+        x: 87.25729350925093
+        y: 508.8200615915433
+      positionAbsolute:
+        x: 87.25729350925093
+        y: 508.8200615915433
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 569
+    - data:
+        author: 3Dify-developer
+        desc: ''
+        height: 88
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"font-size:
+          16px;","text":"Sample MCP server for testing","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":1,"textStyle":"font-size:
+          16px;"},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"https://github.com/modelcontextprotocol/servers/tree/main/src/everything","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: cyan
+        title: ''
+        type: ''
+        width: 449
+      height: 88
+      id: '1741626728667'
+      position:
+        x: 737.2683807703559
+        y: 508.8200615915433
+      positionAbsolute:
+        x: 737.2683807703559
+        y: 508.8200615915433
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 449
+    - data:
+        author: 3Dify-developer
+        desc: ''
+        height: 151
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"font-size:
+          16px;","text":"MCP Tool Test prompt","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"Try mcp tools one-by-one","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":1,"textStyle":"font-size:
+          16px;"},{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"-  judge result in \"thought\" phase (I want to know at least
+          Fail or Success)","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"- avoid \"sampleLLM\" which is not compatible feature yet.
+          ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: violet
+        title: ''
+        type: ''
+        width: 570
+      height: 151
+      id: '1741669149712'
+      position:
+        x: 87.25729350925093
+        y: 718.2693074279789
+      positionAbsolute:
+        x: 87.25729350925093
+        y: 718.2693074279789
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 570
+    - data:
+        author: 3Dify-developer
+        desc: ''
+        height: 140
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"font-size:
+          16px;","text":"MCP Resource Test prompt","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"Try mcp resources one-by-one","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":1,"textStyle":"font-size:
+          16px;"},{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"-  judge result in \"thought\" phase (I want to know at least
+          Fail or Success)","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: yellow
+        title: ''
+        type: ''
+        width: 568
+      height: 140
+      id: '1741669231167'
+      position:
+        x: 88.65225939320432
+        y: 879.6113451588606
+      positionAbsolute:
+        x: 88.65225939320432
+        y: 879.6113451588606
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 568
+    - data:
+        author: 3Dify-developer
+        desc: ''
+        height: 128
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"font-size:
+          16px;","text":"MCP Prompt Test prompt","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"Try mcp prompts one-by-one","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":1,"textStyle":"font-size:
+          16px;"},{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"-  judge result in \"thought\" phase (I want to know at least
+          Fail or Success)","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: green
+        title: ''
+        type: ''
+        width: 568
+      height: 128
+      id: '1741669352719'
+      position:
+        x: 87.25729350925093
+        y: 1033.9889783833733
+      positionAbsolute:
+        x: 87.25729350925093
+        y: 1033.9889783833733
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 568
+    - data:
+        author: 3Dify-developer
+        desc: ''
+        height: 354
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"font-size:
+          16px;","text":"Windows ","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"config.json example","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"{","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":1,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"  \"mcpServers\":
+          {","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"    \"everything\":
+          {","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"      \"command\":
+          \"npx.cmd\",","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"      \"args\":
+          [","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"        \"-y\",","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"        \"@modelcontextprotocol/server-everything\"","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"      ]","type":"text","version":1}],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"    }","type":"text","version":1}],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"  }","type":"text","version":1}],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"}","type":"text","version":1}],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":1,"mode":"normal","style":"font-size:
+          16px;","text":"warnning","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":":  use ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"font-size:
+          16px;","text":"npx.cmd","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":" ","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":1,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"        instead of npx","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: pink
+        title: ''
+        type: ''
+        width: 288
+      height: 354
+      id: '1741671860068'
+      position:
+        x: 675.9865130991246
+        y: 610.9646610182883
+      positionAbsolute:
+        x: 675.9865130991246
+        y: 610.9646610182883
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 288
+    - data:
+        agent_parameters:
+          config_json:
+            type: constant
+            value: "{\n  \"mcpServers\": {\n    \"everything\": {\n      \"command\"\
+              : \"npx.cmd\",\n      \"args\": [\n        \"-y\",\n        \"@modelcontextprotocol/server-everything\"\
+              \n      ]\n    }\n  }\n}"
+          instruction:
+            type: constant
+            value: You are helpful LLM agent.
+          maximum_iterations:
+            type: constant
+            value: 3
+          model:
+            type: constant
+            value:
+              completion_params: {}
+              mode: chat
+              model: gemini-2.0-flash-exp
+              model_type: llm
+              provider: langgenius/gemini/google
+              type: model-selector
+          query:
+            type: constant
+            value: '{{#sys.query#}}'
+          tools:
+            type: constant
+            value: []
+        agent_strategy_label: mcpReAct
+        agent_strategy_name: mcpReAct
+        agent_strategy_provider_name: 3dify-project/mcp_client/agent
+        desc: ''
+        output_schema: null
+        plugin_unique_identifier: 3dify-project/mcp_client:0.0.1@eac12d97acd3c57819aae9ee561591b60708e1cf09bdaa3ba38fce60221ad50d
+        selected: false
+        title: Agent
+        type: agent
+      height: 145
+      id: '1741765826830'
+      position:
+        x: 347.36834087720297
+        y: 282
+      positionAbsolute:
+        x: 347.36834087720297
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 243
+    - data:
+        author: 3Dify-developer
+        desc: ''
+        height: 93
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          14px;","text":"TOOL LIST should not blank. Choose some plugin.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":"font-size:
+          14px;"},{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          14px;","text":"I recommend official Dify plugin like \"Current Time\".","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":"font-size:
+          14px;"}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: yellow
+        title: ''
+        type: ''
+        width: 363
+      height: 93
+      id: '1741766414431'
+      position:
+        x: 289.33163665746144
+        y: 178.12817056680163
+      positionAbsolute:
+        x: 289.33163665746144
+        y: 178.12817056680163
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 363
+    viewport:
+      x: 184.66257640044716
+      y: -96.37762447627853
+      zoom: 0.8615237662477786
