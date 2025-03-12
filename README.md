@@ -74,7 +74,7 @@ docker compose up -d
 ```
 Once this field is added, the Dify platform will allow the installation of all plugins that are not listed (and thus not verified) in the Dify Marketplace.
 > [!TIP]
-> Marketplace need Approval. if stars☆ reach 100, I'll consider to make PR for them.
+> Marketplace need Approval. If stars☆ reach 100, I'll consider to make PR for them.
 
 ## Where does this plugin show up?
 - It takes few minutes to install
@@ -119,7 +119,7 @@ Choose your OS-compatible verson at here:<br>
 https://github.com/langgenius/dify-plugin-daemon/releases <br>
 Rename it as dify.exe
 
-#### Reference  
+### Reference  
 https://docs.dify.ai/plugins/quick-start/develop-plugins/initialize-development-tools
 
 > [!NOTE]
