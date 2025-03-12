@@ -59,18 +59,39 @@ https://github.com/3dify-project/dify-mcp-client/
 - Dify > PLUGINS > + Install plugin > INSTALL FROM > Local Package File
 ![difyUI2](./_assets/plugin_install_offline.png)
 
+## How to handle errors when installing plugins?
+
+**Issue**: If you encounter the error message: `plugin verification has been enabled, and the plugin you want to install has a bad signature`, how to handle the issue? <br>
+**Solution**: Add the following line to the end of your `/docker/.env` configuration file: 
+```
+FORCE_VERIFYING_SIGNATURE=false
+```
+Run the following commands to restart the Dify service:
+```bash
+cd docker
+docker compose down
+docker compose up -d
+```
+Once this field is added, the Dify platform will allow the installation of all plugins that are not listed (and thus not verified) in the Dify Marketplace.
+> [!TIP]
+> Marketplace need Approval. if stars☆ reach 100, I'll consider to make PR for them.
+
+## Where does this plugin show up?
+- It takes few minutes to install
+- Once installed, you can use it any workflows as Agent node
+- Select "mcpReAct" strategy (otherwise no MCP)
+![asAgentStrategiesNode](./_assets/asAgentStrategiesNode.png)
+
 ## Compatible claude_desktop_config.json
 MCP Agent Plugin node require config_json like this to command to awake an MCP server
 ```
 {
-    "mcpservers":
-    {
-        "name_of_mcpserver":
-        {
+    "mcpservers":{
+        "name_of_mcpserver":{
             "command": "npx",
             "args": ["arg1", "arg2"]
         },
-     }
+    }
 }
 ```
 > [!WARNING]
