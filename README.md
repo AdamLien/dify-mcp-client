@@ -35,7 +35,8 @@ Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`
 > [!CAUTION]
 > This plugin does **not** implement a **human-in-the-loop** mechanism by default, so connect **reliable mcp server only**.<br>
 > To avoid it, decrease `max itereations`(default:`3`) to `1`, and use this Agent node repeatedly in Chatflow.<br>
-> However, agent memory is reset by the end of Workflow, so use `Conversaton Variable` to save history and pass to QUERY.  
+> However, agent memory is reset by the end of Workflow.<br>
+> Use `Conversaton Variable` to save history and pass it to QUERY.  
 > Don't forget to add a phrase such as
 > *"ask for user's permission when calling tools"* in INSTRUCTION.
 
@@ -104,8 +105,9 @@ MCP Agent Plugin node require config_json like this to command to awake an MCP s
 }
 ```
 > [!WARNING]
-> - Currently support one MCP server one Agent plugin node
+> - Currently support one MCP server per Agent node
 > - `npx.cmd` instead of `npx` if you use Windows
+> - `npx` command needs global install of Node.js
 
 ## Chatflow Example
 ![showcase2](./_assets/everything_mcp_server_test_resource.png)
