@@ -46,16 +46,13 @@ Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`
 # How to use plugin 
 > [!WARNING]
 > ## Only source code deploy is supported
->  PATH for module like "npx" is essential to awake stdio MCP server.
->  Default windows command prompt that knows npx PATH.
->  By executing `python -m main`(plugin install command) in the CLI, MCP plugin works well.
->  `.difypkg` is useful, but codes are executed at built-in python environment which means module PATH is not available. 
->  `pip install -r requirement.txt` is not enough for MCP.
->  I tried to tell PATH via dify/docker/.env file like `NPX_PATH=Absolete/Path/to/npx`,
->  and `os.environ.get("NPX_PATH")` in mcpReAct.py, but failed.
->  - One possible solution is to store npx module binary in Dify plugin's key-value storage.
->  - Other solution is mount volume by editing docker-compose.yaml.
->  - If you any plans or ideas, welcome to issue.
+> steps are as follows.
+> [how-to-develop-and-deploy-plugin](https://github.com/3dify-project/dify-mcp-client?tab=readme-ov-file#how-to-develop-and-deploy-plugin)
+> - PATH for module like "npx" is essential to awake stdio MCP server.
+> - Default windows command prompt that knows npx PATH.
+> - By executing `python -m main`(plugin install command) in the CLI, MCP plugin works well.
+> - `.difypkg` is useful, but codes are executed at built-in python environment which means module PATH is not available. 
+>  - If you any plans or ideas, welcome to issue. https://github.com/3dify-project/dify-mcp-client/issues/1
 
 ### Install plugin from GitHub (online)  -> Not supported yet
 - Enter the following GitHub repository name
@@ -120,7 +117,7 @@ https://github.com/modelcontextprotocol/servers/tree/main/src/everything
 
 
 
-# How to develop or debug plugin
+# How to develop and deploy plugin
 
 ### General plugin dev guide
 https://github.com/3dify-project/dify-mcp-client/blob/main/GUIDE.md
