@@ -43,9 +43,21 @@ Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`
 > - The Tools field should not be left blank. so **select Dify tools** like "current time".
 > - The SSE connection is not supported
 
-# How to use plugin
+# How to use plugin 
+> [!WARNING]
+> ## Only source code deploy is supported
+>  PATH for module like "npx" is essential to awake stdio MCP server.
+>  Default windows command prompt that knows npx PATH.
+>  By executing `python -m main`(plugin install command) in the CLI, MCP plugin works well.
+>  `.difypkg` is useful, but codes are executed at built-in python environment which means module PATH is not available. 
+>  `pip install -r requirement.txt` is not enough for MCP.
+>  I tried to tell PATH via dify/docker/.env file like `NPX_PATH=Absolete/Path/to/npx`,
+>  and `os.environ.get("NPX_PATH")` in mcpReAct.py, but failed.
+>  - One possible solution is to store npx module binary in Dify plugin's key-value storage.
+>  - Other solution is mount volume by editing docker-compose.yaml.
+>  - If you any plans or ideas, welcome to issue.
 
-### Install plugin from GitHub (online)
+### Install plugin from GitHub (online)  -> Not supported yet
 - Enter the following GitHub repository name
 ```
 https://github.com/3dify-project/dify-mcp-client/
@@ -53,7 +65,7 @@ https://github.com/3dify-project/dify-mcp-client/
 - Dify > PLUGINS > + Install plugin > INSTALL FROM > GitHub
 ![difyUI1](./_assets/plugin_install_online.png)
 
-### Install plugin from .difypkg file (offline)
+### Install plugin from .difypkg file (offline) -> Not supported yet
 - Go to Releases https://github.com/3dify-project/dify-mcp-client/releases
 - Select suitable version of `.difypkg`
 - Dify > PLUGINS > + Install plugin > INSTALL FROM > Local Package File
