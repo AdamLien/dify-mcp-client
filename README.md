@@ -6,7 +6,7 @@
 ![showcase1](./_assets/arxiv_mcp_server_test.png)
 
 ## How it works
-Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`.
+Currently, each `MCP client` (ReAct Agent) node can connect a `MCP server`.
 1.  `Tool`, `Resource`, `Prompt` lists are converted into Dify Tools.
 2.   Your selected LLM can see their `name`, `description`, `argument type`
 3.   The LLM calls Tools based on the ReAct loop (Reason → Act → Observe).
@@ -25,6 +25,7 @@ Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`
 - `__init__()` for initializing `AsyncExitStack` and `event loop`
 - Some codes in `_handle_invoke_action()` for MCP 
 - MCP setup and cleanup in `_invoke()`
+- Add SSE MCP client (v0.0.2)
 > [!IMPORTANT]
 > ReAct while loop is as they are
 
@@ -42,20 +43,10 @@ Currently, each `MCP client` (ReAct Agent) node can connect a stdio `MCP server`
 
 > [!WARNING]
 > - The Tools field should not be left blank. so **select Dify tools** like "current time".
-> - The SSE connection is not supported
 
-# How to use plugin 
-> [!WARNING]
-> ## Only source code deploy is supported
-> steps are as follows.
-> [how-to-develop-and-deploy-plugin](https://github.com/3dify-project/dify-mcp-client?tab=readme-ov-file#how-to-develop-and-deploy-plugin)
-> - PATH for module like "npx" is essential to awake stdio MCP server.
-> - Default windows command prompt that knows npx PATH.
-> - By executing `python -m main`(plugin install command) in the CLI, MCP plugin works well.
-> - `.difypkg` is useful, but codes are executed at built-in python environment which means module PATH is not available. 
->  - If you any plans or ideas, welcome to issue. https://github.com/3dify-project/dify-mcp-client/issues/1
+# How to use this plugin 
 
-### Install plugin from GitHub (online)  -> Not supported yet
+## Install the plugin from GitHub (online)
 - Enter the following GitHub repository name
 ```
 https://github.com/3dify-project/dify-mcp-client/
@@ -63,7 +54,7 @@ https://github.com/3dify-project/dify-mcp-client/
 - Dify > PLUGINS > + Install plugin > INSTALL FROM > GitHub
 ![difyUI1](./_assets/plugin_install_online.png)
 
-### Install plugin from .difypkg file (offline) -> Not supported yet
+## Install the plugin from .difypkg file (offline)
 - Go to Releases https://github.com/3dify-project/dify-mcp-client/releases
 - Select suitable version of `.difypkg`
 - Dify > PLUGINS > + Install plugin > INSTALL FROM > Local Package File
@@ -86,28 +77,29 @@ Once this field is added, the Dify platform will allow the installation of all p
 > [!TIP]
 > Marketplace need Approval. If stars☆ reach 100, I'll consider to make PR for them.
 
+## Source code plugin deploy
+steps are as follows.
+[how-to-develop-and-deploy-plugin](https://github.com/3dify-project/dify-mcp-client?tab=readme-ov-file#how-to-develop-and-deploy-plugin)
+
 ## Where does this plugin show up?
 - It takes few minutes to install
 - Once installed, you can use it any workflows as Agent node
 - Select "mcpReAct" strategy (otherwise no MCP)
 ![asAgentStrategiesNode](./_assets/asAgentStrategiesNode.png)
 
-## Compatible claude_desktop_config.json
-MCP Agent Plugin node require config_json like this to command to awake an MCP server
+## Config
+MCP Agent Plugin node require config_json like this to command or URL to awake an MCP server
 ```
 {
     "mcpservers":{
         "name_of_mcpserver":{
-            "command": "npx",
-            "args": ["arg1", "arg2"]
+            "url": "http://host.docker.internal:8080/sse"
         },
     }
 }
 ```
 > [!WARNING]
 > - Currently support one MCP server per Agent node
-> - `npx.cmd` instead of `npx` if you use Windows
-> - `npx` command needs global install of Node.js
 
 ## Chatflow Example
 ![showcase2](./_assets/everything_mcp_server_test_resource.png)
@@ -116,10 +108,61 @@ https://github.com/3dify-project/dify-mcp-client/tree/main/test/chatflow
 #### After download DSL(yml) file, import it in Dify and you can test MCP using "Everything MCP server"
 https://github.com/modelcontextprotocol/servers/tree/main/src/everything
 
+# How to convert stdio MCP server into SSE MCP server
+## Way1: Edit MCP server's code
+If fastMCP server, change like this
+```diff
+if __name__ == "__main__":
+-    mcp.run(transport="stdio")
++    mcp.run(transport="sse")
+```
 
+## Way2: via mcp-proxy
+```
+\mcp-proxy>uv venv -p 3.12
+.venv\Scripts\activate
+uv tool install mcp-proxy
+```
+### Check Node.js has installed and npx(.cmd) Path 
+(Mac/Linux)
+```
+which npx
+```
+(Windows)
+```
+where npx
+```
 
+```
+C:\Program Files\nodejs\npx
+C:\Program Files\nodejs\npx.cmd
+C:\Users\USER_NAME\AppData\Roaming\npm\npx
+C:\Users\USER_NAME\AppData\Roaming\npm\npx.cmd
+```
 
-# How to develop and deploy plugin
+```
+C:\Users\nagisa\mcp-proxy>mcp-proxy --sse-port=8080 --pass-environment -- C:\Program Files\nodejs\npx.cmd --arg1 -y --arg2 @modelcontextprotocol/server-everything
+```
+
+> [!Warning]
+> Additional argument for mcp-proxy. Be careful when you use it. There may be security risk such as XSS, CSRF. (default: no CORS allowed)
+> ```
+> --allow-origin='*'
+> ```
+
+```
+(mcp_proxy) C:\User\USER_NAME\mcp-proxy>mcp-proxy --sse-port=8080 --pass-environment -- C:\Program Files\nodejs\npx.cmd --arg1 -y --arg2 @modelcontextprotocol/server-everything
+DEBUG:root:Starting stdio client and SSE server
+DEBUG:asyncio:Using proactor: IocpProactor
+DEBUG:mcp.server.lowlevel.server:Initializing server 'example-servers/everything'
+DEBUG:mcp.server.sse:SseServerTransport initialized with endpoint: /messages/
+INFO:     Started server process [53104]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8080 (Press CTRL+C to quit)
+```
+
+#🔨 How to develop and deploy plugin
 
 ### General plugin dev guide
 https://github.com/3dify-project/dify-mcp-client/blob/main/GUIDE.md
@@ -178,6 +221,11 @@ python -m main
 > REMOTE_INSTALL_KEY of .env often changes.
 > If you encounter error messages like `handshake failed, invalid key`, renew it.
 
+### package into .difypkg
+./mcp_client is my default root name
+```
+dify plugin package ./ROOT_OF_YOUR_PROJECT
+```
 
 ## Useful GitHub repositories for developers
 
