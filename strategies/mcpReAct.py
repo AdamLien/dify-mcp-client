@@ -40,7 +40,8 @@ ignore_observation_providers = ["wenxin"]
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
-from mcp.types import Resource, Prompt
+from mcp.client.sse import sse_client
+from mcp.types import Tool, Resource, Prompt, ListToolsResult, ListResourcesResult, ListPromptsResult
 
 
 class mcpReActParams(BaseModel):
@@ -50,7 +51,7 @@ class mcpReActParams(BaseModel):
     tools: list[ToolEntity] | None
     inputs: dict[str, Any] = {}
     maximum_iterations: int = 3
-    config_json: str # AgentsStrategyType does not support "object" type so I use "str" instead of dict[str, Any]
+    config_json: str | None # AgentsStrategyType does not support "object" type so I use "str" instead of dict[str, Any]
 
 
 class AgentPromptEntity(BaseModel):
@@ -109,8 +110,6 @@ class mcpReActAgentStrategy(AgentStrategy):
         model = react_params.model
 
         mcp_config_json = ast.literal_eval(react_params.config_json)
-        # print(mcp_config_json.items())  # items() of dictionary is available
-        # print(f"mcp_config_json: {mcp_config_json}")
 
         agent_scratchpad = []
         history_prompt_messages: list[PromptMessage] = []
@@ -153,30 +152,33 @@ class mcpReActAgentStrategy(AgentStrategy):
         #         {
         #             "name_of_mcpserver1": {
         #                 "command": "npx",
-        #                 "args": ["arg1", "arg2"]
+        #                 "args": ["arg1", "arg2"],
+        #                 "env": {"API_KEY": "value"}
         #             },
         #             "name_of_mcpserver2": {
-        #                 "command": "uv",
-        #                 "args": ["arg1"]
+        #                 "url": "http://localhost:3000/sse",
         #             }
         #         }
         #     }
         # }
-        
-        # itarate over the number of "mcpServer" in configjson
-        for mcp_server_name, mcp_server_awake_cmd in mcp_config_json["mcpServers"].items():
-            # print(f"mcp_server_name: {mcp_server_name}") # if you want to create multiple sessions, use it as a key like self.mcp_sessions: dict[str, ClientSession]
-            # print(f"mcp_server_awake_cmd: {mcp_server_awake_cmd}")
 
-            # exsample structure of mcp_server_awake_cmd
+        # itarate over the number of "mcpServer" in configjson
+        for mcp_server_name, mcp_server_cmd_or_url in mcp_config_json["mcpServers"].items():
+            # print(f"mcp_server_name: {mcp_server_name}") # if you want to create multiple sessions, use it as a key like self.mcp_sessions: dict[str, ClientSession]
+            # print(f"mcp_server_cmd_or_url: {mcp_server_cmd_or_url}")
+
+            # exsample structure of mcp_server_cmd_or_url
             #
             #         "name_of_mcpserver1": {
             #             "command": "npx",
             #             "args": ["arg1", "arg2"]
             #         }
+            if mcp_server_cmd_or_url.get("command"): # stdio (standard I/O)
+                # connect to MCP server
+                mcp_tool_list, mcp_resource_list, mcp_prompt_list, self.mcp_session = self._run_async(self._setup_stdio_mcp(mcp_server_cmd_or_url))
 
-            # connect to MCP server
-            mcp_tool_list, mcp_resource_list, mcp_prompt_list, self.mcp_session = self._run_async(self._setup_local_mcp(mcp_server_awake_cmd))
+            elif mcp_server_cmd_or_url.get("url"): # SSE
+                mcp_tool_list, mcp_resource_list, mcp_prompt_list, self.mcp_session = self._run_async(self._setup_sse_mcp(mcp_server_cmd_or_url))
 
             # convert {tools, resources, prompts} into Dify-plugin's ToolEntity format
             mcp_list = self._convert_mcp_components_to_tool_entities(mcp_tool_list, mcp_resource_list, mcp_prompt_list)
@@ -598,7 +600,7 @@ class mcpReActAgentStrategy(AgentStrategy):
                     self.mcp_session, mcp_action_type, mcp_name, tool_invoke_parameters
                 ))
                 #print(f"result: {action_result}")
-
+    
                 result = self._format_mcp_result(mcp_action_type, action_result)
                     
             except Exception as e:
@@ -877,14 +879,26 @@ class mcpReActAgentStrategy(AgentStrategy):
         )
 
         return server_params
+    
+    def _get_mcp_server_url_from_config(self, config_json: dict) -> str: 
+        """
+           "env" is not supported.
+           Additional env is supporesd to be set outside the Dify
+           when awaking SSE MCP server.
+        """
+        # exsample structure of config
 
-    async def _setup_local_mcp(self, config_json: dict) -> tuple[list[ToolEntity], list[ToolEntity], list[ToolEntity], ClientSession]:
-        """Establish MCP client connection (called in _invoke)"""
-        server_params = self._get_mcp_server_params_from_config(config_json)
+        # "sse_server_name": {
+        #   "url": "http://localhost:3000/sse",
+        # }
+        url = config_json["url"]
+        if url is None:
+            raise ValueError("The URL must be a valid string and cannot be None.")
+        
+        return url
+    
+    async def _get_mcp_action_list(self) -> tuple[ListToolsResult, ListResourcesResult, ListPromptsResult]:
         try:
-            transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
-            read, write = transport
-            self.mcp_session = await self.exit_stack.enter_async_context(ClientSession(read, write))
             await self.mcp_session.initialize()
             
             # call only the methods that the server has safely
@@ -903,11 +917,45 @@ class mcpReActAgentStrategy(AgentStrategy):
             except Exception:
                 prompt_list = []
                 
+            return tool_list, resource_list, prompt_list
+        
+        except Exception as e:
+            await self._cleanup_mcp()
+            raise ValueError(f"Failed to initailize MCP session: {e}")
+
+    async def _setup_stdio_mcp(self, config_json: dict) -> tuple[ListToolsResult, ListResourcesResult, ListPromptsResult, ClientSession]:
+        """Establish stdio MCP client connection (called in _invoke)"""
+        server_params = self._get_mcp_server_params_from_config(config_json)
+        try:
+            transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
+            read, write = transport
+            self.mcp_session = await self.exit_stack.enter_async_context(ClientSession(read, write))
+            tool_list, resource_list, prompt_list = await self._get_mcp_action_list()
+                
             return tool_list, resource_list, prompt_list, self.mcp_session
             
         except Exception as e:
             await self._cleanup_mcp()
-            raise ValueError(f"Failed to connect to MCP server: {e}")
+            raise ValueError(f"Failed to connect to MCP server with stdio: {e}")
+    
+    async def _setup_sse_mcp(self, config_json: dict) -> tuple[ListToolsResult, ListResourcesResult, ListPromptsResult, ClientSession]:
+        """Connect to an MCP server running with SSE transport"""
+        mcp_server_url = self._get_mcp_server_url_from_config(config_json)
+        try:
+            sse_transport = await self.exit_stack.enter_async_context(sse_client(url=mcp_server_url))
+            read, write = sse_transport
+            self.mcp_session = await self.exit_stack.enter_async_context(ClientSession(read, write))
+            tool_list, resource_list, prompt_list = await self._get_mcp_action_list()
+                
+            return tool_list, resource_list, prompt_list, self.mcp_session
+            
+        except Exception as e:
+            await self._cleanup_mcp()
+            raise ValueError(f"Failed to connect to MCP server with SSE: {e}")
+
+    # async def _setup_websocket_mcp(self) -> tuple[list[ToolEntity], list[ToolEntity], list[ToolEntity], ClientSession]:
+    #     """Connect to an MCP server running with WebSocket transport"""
+    #     raise NotImplementedError
 
     async def _cleanup_mcp(self):
         """Clean up MCP Client session."""
@@ -966,7 +1014,7 @@ class mcpReActAgentStrategy(AgentStrategy):
         }
         return type_mapping.get(json_type, "string")
 
-    def _convert_mcp_tool_to_tool_entity(self, mcp_tool) -> ToolEntity:
+    def _convert_mcp_tool_to_tool_entity(self, mcp_tool: Tool) -> ToolEntity:
         """Convert MCP Tool to Dify ToolEntity"""
         
         # add processing for tuples
@@ -1178,7 +1226,7 @@ class mcpReActAgentStrategy(AgentStrategy):
             runtime_parameters={"prompt_name": prompt_name},
         )
 
-    def _convert_mcp_components_to_tool_entities(self, mcp_tool_list, mcp_resource_list, mcp_prompt_list):
+    def _convert_mcp_components_to_tool_entities(self, mcp_tool_list, mcp_resource_list, mcp_prompt_list) -> list[ToolEntity]:
         """Convert MCP components to Dify ToolEntity list"""
         tool_entities = []
         
