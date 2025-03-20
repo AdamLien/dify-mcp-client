@@ -109,7 +109,7 @@ https://github.com/3dify-project/dify-mcp-client/tree/main/test/chatflow
 https://github.com/modelcontextprotocol/servers/tree/main/src/everything
 
 # How to convert stdio MCP server into SSE MCP server
-## Way1: Edit MCP server's code
+## way1: Edit MCP server's code
 If fastMCP server, change like this
 ```diff
 if __name__ == "__main__":
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 +    mcp.run(transport="sse")
 ```
 
-## Way2: via mcp-proxy
+## way2: via mcp-proxy
 ```
 \mcp-proxy>uv venv -p 3.12
 .venv\Scripts\activate
@@ -140,8 +140,24 @@ C:\Users\USER_NAME\AppData\Roaming\npm\npx
 C:\Users\USER_NAME\AppData\Roaming\npm\npx.cmd
 ```
 
+If claude_desktop_config.json is following schema,
 ```
-C:\Users\nagisa\mcp-proxy>mcp-proxy --sse-port=8080 --pass-environment -- C:\Program Files\nodejs\npx.cmd --arg1 -y --arg2 @modelcontextprotocol/server-everything
+{
+  "mcpServers": {
+    "SERVER_NAME": {
+       "command": CMD_NAME_OR_PATH 
+       "args": {VALUE1, VALUE2}
+    }
+  }
+}
+```
+### Wake up stdio MCP server by this command
+```
+mcp-proxy --sse-port=8080 --pass-environment -- CMD_NAME_OR_PATH --arg1 VALUE1 --arg2 VALUE2 ...
+```
+If your OS is Windows, use npx.cmd instead of npx. Following is example command to convert stdio "everything MCP server" to SSE via mcp-proxy.
+```
+mcp-proxy --sse-port=8080 --pass-environment -- C:\Program Files\nodejs\npx.cmd --arg1 -y --arg2 @modelcontextprotocol/server-everything
 ```
 
 > [!Warning]
@@ -150,6 +166,7 @@ C:\Users\nagisa\mcp-proxy>mcp-proxy --sse-port=8080 --pass-environment -- C:\Pro
 > --allow-origin='*'
 > ```
 
+Following is the mcp-proxy setup log.
 ```
 (mcp_proxy) C:\User\USER_NAME\mcp-proxy>mcp-proxy --sse-port=8080 --pass-environment -- C:\Program Files\nodejs\npx.cmd --arg1 -y --arg2 @modelcontextprotocol/server-everything
 DEBUG:root:Starting stdio client and SSE server
@@ -162,7 +179,7 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8080 (Press CTRL+C to quit)
 ```
 
-#🔨 How to develop and deploy plugin
+# 🔨 How to develop and deploy plugin
 
 ### General plugin dev guide
 https://github.com/3dify-project/dify-mcp-client/blob/main/GUIDE.md
