@@ -6,7 +6,7 @@
 ![showcase1](./_assets/arxiv_mcp_server_test.png)
 
 ## How it works
-Currently, each `MCP client` (ReAct Agent) node can connect a `MCP server`.
+Each `MCP client` (ReAct Agent) node can connect `MCP servers`.
 1.  `Tool`, `Resource`, `Prompt` lists are converted into Dify Tools.
 2.   Your selected LLM can see their `name`, `description`, `argument type`
 3.   The LLM calls Tools based on the ReAct loop (Reason → Act → Observe).
@@ -16,7 +16,7 @@ Currently, each `MCP client` (ReAct Agent) node can connect a `MCP server`.
 > #### Dify Official Plugins / Agent Strategies
 > https://github.com/langgenius/dify-official-plugins/tree/main/agent-strategies/cot_agent
 
-## What I did
+## ✅ What I did
 - Copied `ReAct.py` and renamed file as `mcpReAct.py`
 - Added `config_json` GUI input field by editing `mcpReAct.yaml` and `class mcpReActParams()` 
 
@@ -26,13 +26,14 @@ Currently, each `MCP client` (ReAct Agent) node can connect a `MCP server`.
 - Some codes in `_handle_invoke_action()` for MCP 
 - MCP setup and cleanup in `_invoke()`
 - Add SSE MCP client (v0.0.2)
+- Support multi SSE servers (v0.0.3)
 > [!IMPORTANT]
 > ReAct while loop is as they are
 
 
 
 
-## Caution and Limitation
+## ⚠️ Caution and Limitation
 > [!CAUTION]
 > This plugin does **not** implement a **human-in-the-loop** mechanism by default, so connect **reliable mcp server only**.<br>
 > To avoid it, decrease `max itereations`(default:`3`) to `1`, and use this Agent node repeatedly in Chatflow.<br>
@@ -46,7 +47,7 @@ Currently, each `MCP client` (ReAct Agent) node can connect a `MCP server`.
 
 # How to use this plugin 
 
-## Install the plugin from GitHub (online)
+## 🛜Install the plugin from GitHub
 - Enter the following GitHub repository name
 ```
 https://github.com/3dify-project/dify-mcp-client/
@@ -54,7 +55,7 @@ https://github.com/3dify-project/dify-mcp-client/
 - Dify > PLUGINS > + Install plugin > INSTALL FROM > GitHub
 ![difyUI1](./_assets/plugin_install_online.png)
 
-## Install the plugin from .difypkg file (offline)
+## ⬇️Install the plugin from .difypkg file
 - Go to Releases https://github.com/3dify-project/dify-mcp-client/releases
 - Select suitable version of `.difypkg`
 - Dify > PLUGINS > + Install plugin > INSTALL FROM > Local Package File
@@ -75,7 +76,7 @@ docker compose up -d
 ```
 Once this field is added, the Dify platform will allow the installation of all plugins that are not listed (and thus not verified) in the Dify Marketplace.
 > [!TIP]
-> Marketplace need Approval. If stars☆ reach 100, I'll consider to make PR for them.
+> Marketplace need Approval. If stars⭐ reach 100, I'll consider to make PR for them.
 
 ## Source code plugin deploy
 steps are as follows.
@@ -88,18 +89,21 @@ steps are as follows.
 ![asAgentStrategiesNode](./_assets/asAgentStrategiesNode.png)
 
 ## Config
-MCP Agent Plugin node require config_json like this to command or URL to awake an MCP server
+MCP Agent Plugin node require config_json like this to command or URL to connect MCP servers
 ```
 {
-    "mcpservers":{
-        "name_of_mcpserver":{
+    "mcpServers":{
+        "name_of_server1":{
             "url": "http://host.docker.internal:8080/sse"
         },
+        "name_of_server2":{
+            "url": "http://host.docker.internal:8008/sse"
+        }
     }
 }
 ```
 > [!WARNING]
-> - Currently support one MCP server per Agent node
+> - Each server's port number should be different, like 8080, 8008, ...
 
 ## Chatflow Example
 ![showcase2](./_assets/everything_mcp_server_test_resource.png)
@@ -109,7 +113,7 @@ https://github.com/3dify-project/dify-mcp-client/tree/main/test/chatflow
 https://github.com/modelcontextprotocol/servers/tree/main/src/everything
 
 # How to convert stdio MCP server into SSE MCP server
-## way1: Edit MCP server's code
+## option1️⃣: Edit MCP server's code
 If fastMCP server, change like this
 ```diff
 if __name__ == "__main__":
@@ -117,7 +121,7 @@ if __name__ == "__main__":
 +    mcp.run(transport="sse")
 ```
 
-## way2: via mcp-proxy
+## option2️⃣: via mcp-proxy
 ```
 \mcp-proxy>uv venv -p 3.12
 .venv\Scripts\activate
@@ -160,13 +164,19 @@ If your OS is Windows, use npx.cmd instead of npx. Following is example command 
 mcp-proxy --sse-port=8080 --pass-environment -- C:\Program Files\nodejs\npx.cmd --arg1 -y --arg2 @modelcontextprotocol/server-everything
 ```
 
+Similarly, on another command line (If you use sample Chatflow for v0.0.3)
+```
+pip install mcp-simple-arxiv
+mcp-proxy --sse-port=8008 --pass-environment -- C:\Users\USER_NAME\AppData\Local\Programs\Python\Python310\python.exe -m -mcp_simple_arxiv
+```
+
 > [!Warning]
 > Additional argument for mcp-proxy. Be careful when you use it. There may be security risk such as XSS, CSRF. (default: no CORS allowed)
 > ```
 > --allow-origin='*'
 > ```
 
-Following is the mcp-proxy setup log.
+Following is a mcp-proxy setup log.
 ```
 (mcp_proxy) C:\User\USER_NAME\mcp-proxy>mcp-proxy --sse-port=8080 --pass-environment -- C:\Program Files\nodejs\npx.cmd --arg1 -y --arg2 @modelcontextprotocol/server-everything
 DEBUG:root:Starting stdio client and SSE server
@@ -238,8 +248,8 @@ python -m main
 > REMOTE_INSTALL_KEY of .env often changes.
 > If you encounter error messages like `handshake failed, invalid key`, renew it.
 
-### package into .difypkg
-./mcp_client is my default root name
+### Package into .difypkg
+`./mcp_client` is my default root name
 ```
 dify plugin package ./ROOT_OF_YOUR_PROJECT
 ```
