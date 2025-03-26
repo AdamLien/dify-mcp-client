@@ -98,7 +98,7 @@ class mcpReActAgentStrategy(AgentStrategy):
     def __init__(self, session):
         super().__init__(session)
         self.exit_stack = AsyncExitStack()
-        self.mcp_session = None
+        self.mcp_sessions = {} # dict[str, ClientSession]  # store multiple MCP sessions
         # added shared "event loop" and user counter as class variables
         self._shared_loop = None
         self._loop_users = 0
@@ -164,9 +164,6 @@ class mcpReActAgentStrategy(AgentStrategy):
 
         # itarate over the number of "mcpServer" in configjson
         for mcp_server_name, mcp_server_cmd_or_url in mcp_config_json["mcpServers"].items():
-            # print(f"mcp_server_name: {mcp_server_name}") # if you want to create multiple sessions, use it as a key like self.mcp_sessions: dict[str, ClientSession]
-            # print(f"mcp_server_cmd_or_url: {mcp_server_cmd_or_url}")
-
             # exsample structure of mcp_server_cmd_or_url
             #
             #         "name_of_mcpserver1": {
@@ -175,13 +172,13 @@ class mcpReActAgentStrategy(AgentStrategy):
             #         }
             if mcp_server_cmd_or_url.get("command"): # stdio (standard I/O)
                 # connect to MCP server
-                mcp_tool_list, mcp_resource_list, mcp_prompt_list, self.mcp_session = self._run_async(self._setup_stdio_mcp(mcp_server_cmd_or_url))
+                mcp_tool_list, mcp_resource_list, mcp_prompt_list, self.mcp_sessions[mcp_server_name] = self._run_async(self._setup_stdio_mcp(mcp_server_cmd_or_url))
 
             elif mcp_server_cmd_or_url.get("url"): # SSE
-                mcp_tool_list, mcp_resource_list, mcp_prompt_list, self.mcp_session = self._run_async(self._setup_sse_mcp(mcp_server_cmd_or_url))
+                mcp_tool_list, mcp_resource_list, mcp_prompt_list, self.mcp_sessions[mcp_server_name] = self._run_async(self._setup_sse_mcp(mcp_server_cmd_or_url))
 
             # convert {tools, resources, prompts} into Dify-plugin's ToolEntity format
-            mcp_list = self._convert_mcp_components_to_tool_entities(mcp_tool_list, mcp_resource_list, mcp_prompt_list)
+            mcp_list = self._convert_mcp_components_to_tool_entities(mcp_server_name, mcp_tool_list, mcp_resource_list, mcp_prompt_list)
     
             # convert mcp {tool, resource, prompt} list into ModelRuntime Tool format
             prompt_messages_tools = self._init_prompt_tools(mcp_list)
@@ -190,6 +187,7 @@ class mcpReActAgentStrategy(AgentStrategy):
             # add MCP tools to tool_instances mapping
             for tool in mcp_list:
                 tool_instances[tool.identity.name] = tool
+
         #########################################
 
         iteration_step = 1
@@ -590,14 +588,14 @@ class mcpReActAgentStrategy(AgentStrategy):
 
         ########## MCP implementation ##########
         # judge if it is MCP tool
-        is_mcp_tool, mcp_action_type, mcp_name = self._parse_mcp_tool_name(tool_call_name)
+        is_mcp_tool, mcp_action_type, action_name, mcp_server_name = self._parse_mcp_tool_name(tool_call_name)
         
         # if it is MCP action, invoke it with MCP session
-        if is_mcp_tool and hasattr(self, 'mcp_session') and self.mcp_session:
+        if is_mcp_tool:
             try:
                 # execute async function synchronously
                 action_result = self._run_async(self._invoke_mcp_action(
-                    self.mcp_session, mcp_action_type, mcp_name, tool_invoke_parameters
+                    self.mcp_sessions[mcp_server_name], mcp_action_type, action_name, tool_invoke_parameters
                 ))
                 #print(f"result: {action_result}")
     
@@ -759,22 +757,26 @@ class mcpReActAgentStrategy(AgentStrategy):
 
 ######################## following methods are MCP specific ########################
 
-    def _parse_mcp_tool_name(self, tool_name: str) -> tuple[bool, str, str]:
+    def _parse_mcp_tool_name(self, tool_name: str) -> tuple[bool, str, str, str]:
         """Determine if the tool name is an MCP tool, and return the type and actual name
 
         Args:
-            tool_name: original tool name
+            tool_name: name as Dify tool 
 
         Returns:
-            (is_mcp_tool, action_type, actual_name): whether it is an MCP tool, action type, actual name
+            (is_mcp_tool, action_type, action_name, mcp_server_name)
         """
-        if tool_name.startswith("mcp_tool_"):
-            return True, "tool", tool_name[9:]
-        elif tool_name.startswith("mcp_resource_"):
-            return True, "resource", tool_name[13:]
-        elif tool_name.startswith("mcp_prompt_"):
-            return True, "prompt", tool_name[11:]
-        return False, "", ""
+        if "_mcp_tool_" in tool_name:
+            # example: xxx_mcp_tool_yyy 
+            #            |  split  |
+            # [0] ->  xxx: MCP server name,
+            # [1] ->  yyy: Actual action name
+            return True, "tool", tool_name.split("_mcp_tool_")[1], tool_name.split("_mcp_tool_")[0]
+        elif "_mcp_resource_" in tool_name:
+            return True, "resource", tool_name.split("_mcp_resource_")[1], tool_name.split("_mcp_resource_")[0]
+        elif "_mcp_prompt_" in tool_name:
+            return True, "prompt", tool_name.split("_mcp_prompt_")[1], tool_name.split("_mcp_prompt_")[0]
+        return False, "", "", ""
     
     def _format_mcp_result(self, action_type: str, action_result: Any) -> str:
         """Format the MCP execution result as a string
@@ -897,23 +899,21 @@ class mcpReActAgentStrategy(AgentStrategy):
         
         return url
     
-    async def _get_mcp_action_list(self) -> tuple[ListToolsResult, ListResourcesResult, ListPromptsResult]:
+    async def _get_mcp_action_list(self, mcp_session: ClientSession) -> tuple[ListToolsResult, ListResourcesResult, ListPromptsResult]:
         try:
-            await self.mcp_session.initialize()
-            
             # call only the methods that the server has safely
             try:
-                tool_list = await self.mcp_session.list_tools()
+                tool_list = await mcp_session.list_tools()
             except Exception:
                 tool_list = []  # use an empty list if not supported
                 
             try:
-                resource_list = await self.mcp_session.list_resources()
+                resource_list = await mcp_session.list_resources()
             except Exception:
                 resource_list = []
                 
             try:
-                prompt_list = await self.mcp_session.list_prompts()
+                prompt_list = await mcp_session.list_prompts()
             except Exception:
                 prompt_list = []
                 
@@ -921,7 +921,7 @@ class mcpReActAgentStrategy(AgentStrategy):
         
         except Exception as e:
             await self._cleanup_mcp()
-            raise ValueError(f"Failed to initailize MCP session: {e}")
+            raise ValueError(f"Failed to get MCP <tool, resource, prompt> list: {e}")
 
     async def _setup_stdio_mcp(self, config_json: dict) -> tuple[ListToolsResult, ListResourcesResult, ListPromptsResult, ClientSession]:
         """Establish stdio MCP client connection (called in _invoke)"""
@@ -929,10 +929,11 @@ class mcpReActAgentStrategy(AgentStrategy):
         try:
             transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
             read, write = transport
-            self.mcp_session = await self.exit_stack.enter_async_context(ClientSession(read, write))
-            tool_list, resource_list, prompt_list = await self._get_mcp_action_list()
+            mcp_session = await self.exit_stack.enter_async_context(ClientSession(read, write))
+            await mcp_session.initialize()
+            tool_list, resource_list, prompt_list = await self._get_mcp_action_list(mcp_session)
                 
-            return tool_list, resource_list, prompt_list, self.mcp_session
+            return tool_list, resource_list, prompt_list, mcp_session
             
         except Exception as e:
             await self._cleanup_mcp()
@@ -944,10 +945,11 @@ class mcpReActAgentStrategy(AgentStrategy):
         try:
             sse_transport = await self.exit_stack.enter_async_context(sse_client(url=mcp_server_url))
             read, write = sse_transport
-            self.mcp_session = await self.exit_stack.enter_async_context(ClientSession(read, write))
-            tool_list, resource_list, prompt_list = await self._get_mcp_action_list()
+            mcp_session = await self.exit_stack.enter_async_context(ClientSession(read, write))
+            await mcp_session.initialize()
+            tool_list, resource_list, prompt_list = await self._get_mcp_action_list(mcp_session)
                 
-            return tool_list, resource_list, prompt_list, self.mcp_session
+            return tool_list, resource_list, prompt_list, mcp_session
             
         except Exception as e:
             await self._cleanup_mcp()
@@ -967,7 +969,7 @@ class mcpReActAgentStrategy(AgentStrategy):
                     print(f"Resource release error: {e}")
             finally:
                 self.exit_stack = None
-                self.mcp_session = None
+                self.mcp_sessions = None
 
     def _run_async(self, coroutine):
         """Helper function to run async coroutine synchronously (semaphore method)"""
@@ -1014,7 +1016,7 @@ class mcpReActAgentStrategy(AgentStrategy):
         }
         return type_mapping.get(json_type, "string")
 
-    def _convert_mcp_tool_to_tool_entity(self, mcp_tool: Tool) -> ToolEntity:
+    def _convert_mcp_tool_to_tool_entity(self, mcp_tool: Tool, mcp_server_name: str) -> ToolEntity:
         """Convert MCP Tool to Dify ToolEntity"""
         
         # add processing for tuples
@@ -1061,7 +1063,7 @@ class mcpReActAgentStrategy(AgentStrategy):
         
         identity = AgentToolIdentity(
             author="MCP",
-            name=f"mcp_tool_{tool_name}",
+            name=f"{mcp_server_name}_mcp_tool_{tool_name}",
             label=I18nObject(
                 en_US=tool_name,
             ),
@@ -1114,7 +1116,7 @@ class mcpReActAgentStrategy(AgentStrategy):
             has_runtime_parameters=True
         )
 
-    def _convert_mcp_resource_to_tool_entity(self, mcp_resource: Resource) -> ToolEntity:
+    def _convert_mcp_resource_to_tool_entity(self, mcp_resource: Resource, mcp_server_name: str) -> ToolEntity:
         """Convert MCP Resource to Dify ToolEntity"""
         
         # add processing for tuples
@@ -1138,7 +1140,7 @@ class mcpReActAgentStrategy(AgentStrategy):
         
         identity = AgentToolIdentity(
             author="MCP",
-            name=f"mcp_resource_{resource_name}",
+            name=f"{mcp_server_name}_mcp_resource_{resource_name}",
             label=I18nObject(
                 en_US=f"Read {resource_name}"
             ),
@@ -1166,7 +1168,7 @@ class mcpReActAgentStrategy(AgentStrategy):
             runtime_parameters={"uri": str(resource_uri)} 
         )
 
-    def _convert_mcp_prompt_to_tool_entity(self, mcp_prompt: Prompt) -> ToolEntity:
+    def _convert_mcp_prompt_to_tool_entity(self, mcp_prompt: Prompt, mcp_server_name: str) -> ToolEntity:
         """Convert MCP Prompt to Dify ToolEntity"""
         
         # add processing for tuples
@@ -1187,7 +1189,7 @@ class mcpReActAgentStrategy(AgentStrategy):
         
         identity = AgentToolIdentity(
             author="MCP",
-            name=f"mcp_prompt_{prompt_name}",
+            name=f"{mcp_server_name}_mcp_prompt_{prompt_name}",
             label=I18nObject(
                 en_US=f"Use prompt: {prompt_name}"
             ),
@@ -1226,7 +1228,13 @@ class mcpReActAgentStrategy(AgentStrategy):
             runtime_parameters={"prompt_name": prompt_name},
         )
 
-    def _convert_mcp_components_to_tool_entities(self, mcp_tool_list, mcp_resource_list, mcp_prompt_list) -> list[ToolEntity]:
+    def _convert_mcp_components_to_tool_entities(
+            self,
+            mcp_server_name: str,
+            mcp_tool_list: ListToolsResult,
+            mcp_resource_list: ListResourcesResult,
+            mcp_prompt_list: ListPromptsResult
+        ) -> list[ToolEntity]:
         """Convert MCP components to Dify ToolEntity list"""
         tool_entities = []
         
@@ -1239,7 +1247,7 @@ class mcpReActAgentStrategy(AgentStrategy):
                 break
         
         for tool in actual_tools:
-            tool_entities.append(self._convert_mcp_tool_to_tool_entity(tool))
+            tool_entities.append(self._convert_mcp_tool_to_tool_entity(tool, mcp_server_name))
         
         # process resources similarly
         actual_resources = []
@@ -1249,7 +1257,7 @@ class mcpReActAgentStrategy(AgentStrategy):
                 break
         
         for resource in actual_resources:
-            tool_entities.append(self._convert_mcp_resource_to_tool_entity(resource))
+            tool_entities.append(self._convert_mcp_resource_to_tool_entity(resource, mcp_server_name))
 
         # process prompts similarly
         actual_prompts = []
@@ -1259,6 +1267,6 @@ class mcpReActAgentStrategy(AgentStrategy):
                 break
         
         for prompt in actual_prompts:
-            tool_entities.append(self._convert_mcp_prompt_to_tool_entity(prompt))
+            tool_entities.append(self._convert_mcp_prompt_to_tool_entity(prompt, mcp_server_name))
         
         return tool_entities
