@@ -45,9 +45,6 @@ Each `MCP client` (ReAct Agent) node can connect `MCP servers`.
 > Don't forget to add a phrase such as
 > *"ask for user's permission when calling tools"* in INSTRUCTION.
 
-> [!WARNING]
-> - The Tools field should not be left blank. so **select Dify tools** like "current time".
-
 # How to use this plugin 
 
 ## 🛜Install the plugin from GitHub
@@ -104,17 +101,19 @@ MCP Agent Plugin node require config_json like this to command or URL to connect
 > [!WARNING]
 > - Each server's port number should be different, like 8080, 8008, ...
 > - If you want to use stdio mcp server
->   - Convert it to SSE mcp server 
->   - or deploy with source code (**NOT** by .difypkg or GitHub reposity name install)
+>   - Convert it to SSE mcp server https://github.com/3dify-project/dify-mcp-client/edit/main/README.md#how-to-convert-stdio-mcp-server-into-sse-mcp-server
+>   - or deploy with source code (**NOT** by .difypkg or GitHub reposity name install) https://github.com/3dify-project/dify-mcp-client/edit/main/README.md#-how-to-develop-and-deploy-plugin
 
 ## Chatflow Example
 ![showcase2](./_assets/everything_mcp_server_test_resource.png)
+> [!WARNING]
+> - The Tools field should not be left blank. so **select Dify tools** like "current time".
 #### I provide this Dify ChatFlow `.yml` for testing this plugin.
 https://github.com/3dify-project/dify-mcp-client/tree/main/test/chatflow
 #### After download DSL(yml) file, import it in Dify and you can test MCP using "Everything MCP server"
 https://github.com/modelcontextprotocol/servers/tree/main/src/everything
 
-# How to convert stdio MCP server into SSE MCP server
+# How to convert `stdio` MCP server into SSE MCP server
 ## option1️⃣: Edit MCP server's code
 If fastMCP server, change like this
 ```diff
