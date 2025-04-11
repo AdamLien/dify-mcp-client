@@ -100,9 +100,10 @@ MCP Agent Plugin node require config_json like this to command or URL to connect
 ```
 > [!WARNING]
 > - Each server's port number should be different, like 8080, 8008, ...
-> - If you want to use stdio mcp server
->   - Convert it to SSE mcp server https://github.com/3dify-project/dify-mcp-client/edit/main/README.md#how-to-convert-stdio-mcp-server-into-sse-mcp-server
->   - or deploy with source code (**NOT** by .difypkg or GitHub reposity name install) https://github.com/3dify-project/dify-mcp-client/edit/main/README.md#-how-to-develop-and-deploy-plugin
+> - If you want to use stdio mcp server, there are 3 ways.
+>   1. Convert it to SSE mcp server https://github.com/3dify-project/dify-mcp-client/edit/main/README.md#how-to-convert-stdio-mcp-server-into-sse-mcp-server
+>   2. Deploy with source code (**NOT** by .difypkg or GitHub reposity name install) https://github.com/3dify-project/dify-mcp-client/edit/main/README.md#-how-to-develop-and-deploy-plugin
+>   3. Pre-install Node.js inside dify-plugin docker (issue:https://github.com/3dify-project/dify-mcp-client/issues/10) guide: https://github.com/tangyoha/tangyoha-bili/tree/master/dify/mcp/map_mcp
 
 ## Chatflow Example
 ![showcase2](./_assets/everything_mcp_server_test_resource.png)
