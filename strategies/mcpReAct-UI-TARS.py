@@ -47,7 +47,7 @@ from mcp.client.sse import sse_client
 from mcp.client.streamable_http import streamablehttp_client
 from mcp.types import Tool, Resource, Prompt, ListToolsResult, ListResourcesResult, ListPromptsResult
 
-class mcpReActParams(BaseModel):
+class mcpReActUITarsParams(BaseModel):
     query: str
     instruction: str | None
     model: AgentModelConfig
@@ -100,7 +100,7 @@ class ToolInvokeMeta(BaseModel):
             "tool_config": self.tool_config,
         }
 
-class mcpReActAgentStrategy(AgentStrategy):
+class mcpReActUITars(AgentStrategy):
     def __init__(self, session):
         super().__init__(session)
         self.exit_stack = AsyncExitStack()
@@ -113,7 +113,7 @@ class mcpReActAgentStrategy(AgentStrategy):
         self._npx_command = self._find_npx_command()
 
     def _invoke(self, parameters: dict[str, Any]) -> Generator[AgentInvokeMessage]:
-        react_params = mcpReActParams(**parameters)
+        react_params = mcpReActUITarsParams(**parameters)
 
         # UI-TARS specific parameters
         self._react_params = react_params
