@@ -101,8 +101,8 @@ class ToolInvokeMeta(BaseModel):
         }
 
 class mcpReActUITars(AgentStrategy):
-    def __init__(self, session):
-        super().__init__(session)
+    def __init__(self, runtime, session):
+        super().__init__(runtime, session)
         self.exit_stack = AsyncExitStack()
         self.mcp_sessions = {} # dict[str, ClientSession]  # store multiple MCP sessions
         # added shared "event loop" and user counter as class variables
@@ -1366,7 +1366,7 @@ class mcpReActUITars(AgentStrategy):
         return "npx"
 
 
-    def _divide_tasks(self, p: mcpReActParams, query:str) -> list[str]: # 廃止
+    def _divide_tasks(self, p: mcpReActUITarsParams, query:str) -> list[str]: # 廃止
       """call manager-LLM to get an ordered list of atomic GUI steps"""
       plan_prompt = (
           "You are a planning agent. "
@@ -1386,7 +1386,7 @@ class mcpReActUITars(AgentStrategy):
           return [query]
 
 
-    def _invoke_ui_tars(self, p: mcpReActParams, task: str, life_time: int) -> str:
+    def _invoke_ui_tars(self, p: mcpReActUITarsParams, task: str, life_time: int) -> str:
         v1 = ""
         if not p.ui_tars_baseURL.endswith("/v1"):
             v1 = "/v1"

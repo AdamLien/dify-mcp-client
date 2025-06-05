@@ -96,8 +96,8 @@ class ToolInvokeMeta(BaseModel):
 
 
 class mcpReActAgentStrategy(AgentStrategy):
-    def __init__(self, session):
-        super().__init__(session)
+    def __init__(self, runtime, session):
+        super().__init__(runtime, session)
         self.exit_stack = AsyncExitStack()
         self.mcp_sessions = {} # dict[str, ClientSession]  # store multiple MCP sessions
         # added shared "event loop" and user counter as class variables
