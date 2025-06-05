@@ -1,5 +1,5 @@
 identity:
-  author: langgenius
+  author: 3dify-developer
   name: agent
   label:
     en_US: Agent
@@ -11,9 +11,8 @@ identity:
     pt_BR: Agent
   icon: icon.svg
 strategies:
-  - strategies/function_calling.yaml
-  - strategies/ReAct.yaml
   - strategies/mcpReAct.yaml
+  - strategies/mcpReAct-UI-TARS.yaml
 extra:
   python:
     source: provider/agent.py
