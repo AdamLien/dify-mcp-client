@@ -4,6 +4,9 @@ import threading
 import ast
 import json
 import time
+import subprocess
+from pathlib import Path
+from dotenv import load_dotenv
 from collections.abc import Generator, Mapping
 from typing import Any, Optional, cast
 from contextlib import AsyncExitStack
@@ -44,7 +47,6 @@ from mcp.client.sse import sse_client
 from mcp.client.streamable_http import streamablehttp_client
 from mcp.types import Tool, Resource, Prompt, ListToolsResult, ListResourcesResult, ListPromptsResult
 
-
 class mcpReActParams(BaseModel):
     query: str
     instruction: str | None
@@ -53,6 +55,10 @@ class mcpReActParams(BaseModel):
     inputs: dict[str, Any] = {}
     maximum_iterations: int = 3
     config_json: str | None # AgentsStrategyType does not support "object" type so I use "str" instead of dict[str, Any]
+    ui_tars_max_life_time_count: int = 10  # Absolute limit by human, but Maneger LLM can limit lower max_itrations dynamically based on each delegated task.
+    ui_tars_hf_model: str = "ByteDance-Seed/UI-TARS-1.5-7B"
+    ui_tars_baseURL: str | None              # API endpoint for UI‑TARS backend
+    ui_tars_apiKey: str | None               # auth token
 
 
 class AgentPromptEntity(BaseModel):
@@ -94,7 +100,6 @@ class ToolInvokeMeta(BaseModel):
             "tool_config": self.tool_config,
         }
 
-
 class mcpReActAgentStrategy(AgentStrategy):
     def __init__(self, session):
         super().__init__(session)
@@ -104,9 +109,15 @@ class mcpReActAgentStrategy(AgentStrategy):
         self._shared_loop = None
         self._loop_users = 0
         self._loop_lock = threading.Lock()  # lock for thread safety
+        self._setup_nodejs_path()
+        self._npx_command = self._find_npx_command()
 
     def _invoke(self, parameters: dict[str, Any]) -> Generator[AgentInvokeMessage]:
         react_params = mcpReActParams(**parameters)
+
+        # UI-TARS specific parameters
+        self._react_params = react_params
+
         query = react_params.query
         model = react_params.model
 
@@ -193,6 +204,15 @@ class mcpReActAgentStrategy(AgentStrategy):
             for tool in mcp_list:
                 tool_instances[tool.identity.name] = tool
 
+        #########################################
+
+        ######### UI-TARS implementation ########
+        ui_tars_tool = self._create_ui_tars_tool_entity(life_time_max_cap=react_params.ui_tars_max_life_time_count)
+
+        # register UI-TARS as Dify tool
+        self._prompt_messages_tools += self._init_prompt_tools([ui_tars_tool])
+        # append to tool_instances
+        tool_instances[ui_tars_tool.identity.name] = ui_tars_tool
         #########################################
 
         iteration_step = 1
@@ -613,6 +633,28 @@ class mcpReActAgentStrategy(AgentStrategy):
             
             return result, tool_invoke_parameters
         #########################################
+
+        ################ UI-TARS implementation ####################
+        elif tool_call_name == "ui_tars":
+            # NotImplemented:
+            # requested = int(tool_call_args.get("maximum_iterations", 3))
+            # cap       = self._react_params.ui_tars_max_iterations or 10
+            # max_iter  = min(requested, cap)
+
+            # tasks = self._divide_tasks(self._react_params, self._react_params.query)
+
+            task = ""
+            life_time = 1
+            print("tool_invoke_parameters:", str(tool_invoke_parameters))
+            print("tool_call_args:", str(tool_call_args))
+            task = tool_invoke_parameters["task"]
+            life_time = int(tool_invoke_parameters["life_time"])
+            life_time = min(life_time, self._react_params.ui_tars_max_life_time_count)  # Cap by user defined max lifetime count
+            
+            result = self._invoke_ui_tars(self._react_params, str(task), life_time)
+
+            return result, tool_invoke_parameters
+        ############################################################
 
         try:
             tool_invoke_responses = self.session.tool.invoke(
@@ -1288,3 +1330,175 @@ class mcpReActAgentStrategy(AgentStrategy):
             tool_entities.append(self._convert_mcp_prompt_to_tool_entity(prompt, mcp_server_name))
         
         return tool_entities
+
+
+    ########## UI-TARS implementation ##########
+    
+    def _setup_nodejs_path(self):
+        """Node.js from .env (Only if local plugin deployment)"""
+        env_path = '../.env'
+        if os.path.exists(env_path):
+            load_dotenv(dotenv_path=env_path)
+        
+        nodejs_path_from_env = os.getenv('NODEJS_PATH')
+        if nodejs_path_from_env:
+            original_path = os.environ.get('PATH', '')
+            if nodejs_path_from_env not in original_path:
+                # Append Node.js PATH
+                os.environ["PATH"] = f"{nodejs_path_from_env}{os.pathsep}{original_path}"
+                print(f"Set Node.js PATH: {nodejs_path_from_env}")
+
+    def _find_npx_command(self) -> str:
+        """Check available npx command in the OS"""
+        import platform
+        import shutil
+        
+        if platform.system() == "Windows":
+            npx_cmd = shutil.which("npx.cmd")
+            if npx_cmd:
+                return "npx.cmd"
+        
+        npx_cmd = shutil.which("npx")
+        if npx_cmd:
+            return "npx"
+        
+        print("Warnning: npx command couldn't be resolved. UI-TARS-SDK will use default 'npx'.")
+        return "npx"
+
+
+    def _divide_tasks(self, p: mcpReActParams, query:str) -> list[str]: # 廃止
+      """call manager-LLM to get an ordered list of atomic GUI steps"""
+      plan_prompt = (
+          "You are a planning agent. "
+          "Decompose the following high-level goal into a strictly ordered list "
+          "of minimal GUI actions. Return JSON array of strings.\n\n"
+          f"GOAL: {query}"
+      )
+      plan = self.session.model.llm.invoke(
+          model_config=LLMModelConfig(**p.model.model_dump(mode="json")),
+          prompt_messages=[SystemPromptMessage(content=plan_prompt)],
+          stream=False,
+      )
+      try:
+          return json.loads(plan.content)
+      except Exception:
+          # fall back to one-shot
+          return [query]
+
+
+    def _invoke_ui_tars(self, p: mcpReActParams, task: str, life_time: int) -> str:
+        v1 = ""
+        if not p.ui_tars_baseURL.endswith("/v1"):
+            v1 = "/v1"
+
+        gui_agent_param_json = {
+            "config": {
+                "baseURL": p.ui_tars_baseURL + v1,
+                "apiKey": p.ui_tars_apiKey,
+                "model": p.ui_tars_hf_model,
+            },
+            "task": task,   
+            "life_time": life_time,
+        }
+
+        sub_env = os.environ.copy()
+        # Set Hugging Face API key as OPENAI_API_KEY within subprocess
+        sub_env["OPENAI_API_KEY"] = p.ui_tars_apiKey
+
+        ts_file = Path(__file__).with_name("UI-TARS-SDK.ts")
+        cmd = [
+            self._npx_command, "ts-node", "--transpile-only", str(ts_file),
+            "--params", json.dumps(gui_agent_param_json, ensure_ascii=False)
+        ]
+        print(">>", " ".join(cmd))
+
+        proc = subprocess.run(cmd, capture_output=True, env=sub_env)
+
+        """ debug (for Dify plugin's local deployment user) """
+        stdout_str = proc.stdout.decode('utf-8', errors='replace')
+        if proc.stderr:
+            stderr_str = proc.stderr.decode('utf-8', errors='replace')
+            print("\n=== STDERR (decoded) ===")
+            print(stderr_str or "(empty)")
+            print(f"\n=== EXIT CODE: {proc.returncode} ===")
+
+        """ log message for Dify and Manager LLM """
+        stdout_lines = stdout_str.splitlines()
+        # ignore lines unless start with '[UITarsModel]'
+        uitars_lines = [
+            line for line in stdout_lines
+            if line.lstrip().startswith('[UITarsModel]')
+        ]
+        filtered_stdout = '\n'.join(uitars_lines) or '(no UITarsModel output)'
+
+        if proc.returncode in [0, 100]: # return code is 100 if reached max Life-time
+            result = filtered_stdout
+        
+        # exception
+        else:
+            print(f"\n=== Subprocess exited with code: {proc.returncode} ===")
+            if not uitars_lines: # should return whole stdout and stderr? (64encoded image is too large...)
+                result = "stdout:\n" + stdout_str
+                result += "\n\nstderr:\n" + stderr_str
+
+        return result
+
+
+    def _create_ui_tars_tool_entity(self, life_time_max_cap: int) -> ToolEntity:
+        """
+        Create ToolEntity for UI-TARS.  
+        """
+        identity = AgentToolIdentity(
+            author="UI-TARS",
+            name="ui_tars",
+            label=I18nObject(en_US="UI-TARS GUI Agent"),
+            provider="ui_tars",
+        )
+
+        description = ToolDescription(
+            human=I18nObject(en_US="Run the local UI-TARS GUI Agent."),
+            llm=f"Call this tool to invoke Computer Using Agent (VLM + automation library like nutjs). It can see screenshot and think what operation to do next given GUI tasks repeatedly."
+        )
+
+        task_param = ToolParameter(
+            name="task",
+            label=I18nObject(en_US="Task"),
+            human_description=I18nObject(
+                en_US=f"GUI task to be executed by UI-TARS."
+            ),
+            llm_description="""You must fill in task form when you call this tool! GUI task to be executed by UI-TARS. Decompose the high-level goal into some concrete instruction.
+                For example: you can subdivide 'buy a ticket from beijing to shanghai' into following task pipeline.
+                *  'open chrome',
+                *  'open trip.com',
+                *  'click "search" button',
+                *  'select "beijing" in "from" input',
+                *  'select "shanghai" in "to" input',
+                *  'click "search" button',
+                However, UI-TARS is wise enough to think well and judge next task itself.
+                Therefore, if you're not sure what on the screen or predict state (page) transition, tell UI-TARS abstract task.
+                Then, UI-TARS will feedback.
+                """,
+            type="string",
+            required=True,
+            form=ToolParameter.ToolParameterForm.LLM,
+        )
+
+        life_time_param = ToolParameter(
+            name="life_time",
+            label=I18nObject(en_US="Life Time of UI-TARS GUI Agent (Max Loop count)"),
+            human_description=I18nObject(
+                en_US=f"Max Loop Count of GUI Agent (UI-TARS model & GUI operator like NutJS). Default is 10. You can define absolute max loop count. Manager LLM can limit life-time of GUI Agent based on task complexity within this value."
+            ),
+            llm_description=f"Max Loop count of GUI Agent (UI-TARS model & GUI operator like NutJS). Default is 10. User defined max loop count = {str(life_time_max_cap)}. You can limit based on task complexity within {str(life_time_max_cap)} times.",
+            type="number",
+            required=True,
+            form=ToolParameter.ToolParameterForm.LLM,
+        )
+
+        return ToolEntity(
+            identity=identity,
+            description=description,
+            parameters=[task_param, life_time_param],
+            provider_type=ToolProviderType.API,
+            has_runtime_parameters=True,
+        )

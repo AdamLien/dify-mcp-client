@@ -1,0 +1,97 @@
+identity:
+  name: mcpReAct-UI-TARS
+  author: 3dify
+  label:
+    en_US: UI-TARS MCP ReAct Agent
+    zh_Hans: UI-TARS MCP ReAct Agent
+    pt_BR: UI-TARS MCP ReAct Agent
+description:
+  en_US: Hybrid ReAct agent that can call local MCP servers and the UI-TARS GUI-Agent via TypeScript.  LLM selects MCP tools; when the tool name is `ui_tars`, a local GUIAgent is spawned with the parameters below.
+  zh_Hans: 基于 MCP 与 UI-TARS 的混合 ReAct Agent。
+  pt_BR: Agente ReAct híbrido para MCP e UI-TARS.
+parameters:
+  - name: model
+    type: model-selector
+    scope: tool-call&llm
+    required: true
+    label:
+      en_US: Model
+      zh_Hans: 模型
+      pt_BR: Model
+  - name: config_json
+    type: string
+    required: true
+    label:
+      en_US: Commands to awake each MCP servers (claude_desktop_config.json)
+      zh_Hans: 唤醒每个 MCP 服务器的命令（claude_desktop_config.json）
+      pt_BR: Commands to awake each MCP servers (claude_desktop_config.json)
+  - name: tools
+    type: array[tools]
+    required: false
+    label:
+      en_US: Tools list
+      zh_Hans: 工具列表
+      pt_BR: Tools list
+  - name: instruction
+    type: string
+    required: true
+    label:
+      en_US: Instruction
+      zh_Hans: 指令
+      pt_BR: Instruction
+    auto_generate:
+      type: prompt_instruction
+    template:
+      enabled: true
+  - name: query
+    type: string
+    required: true
+    label:
+      en_US: Query
+      zh_Hans: 查询
+      pt_BR: Query
+  - name: maximum_iterations
+    type: number
+    required: true
+    label:
+      en_US: Maxium Iterations
+      zh_Hans: 最大迭代次数
+      pt_BR: Maxium Iterations
+    default: 3
+    min: 1
+    max: 500
+  - name: ui_tars_max_life_time_count
+    type: number
+    required: false
+    label:
+      en_US: Max cap of UI-TARS Life-time count. LLM set limit lower maxLoopCount (parameter of GUIAgent UI-TARS-SDK) dynamically based on task complexity.
+      zh_Hans: UI-TARS 生命周期计数的最大上限。LLM 根据任务复杂程度动态设置 maxLoopCount（GUIAgent UI-TARS-SDK 参数）下限。
+      pt_BR:  Max cap of UI-TARS Life-time count. LLM set limit lower maxLoopCount (parameter of GUIAgent UI-TARS-SDK) dynamically based on task complexity.
+    default: 10
+    min: 1
+    max: 100
+  - name: ui_tars_hf_model
+    type: string
+    required: false
+    default: ByteDance-Seed/UI-TARS-1.5-7B
+    label:
+      en_US: UI-TARS HF Model ID
+      zh_Hans: UI-TARS HF 模型 ID
+      pt_BR: UI-TARS HF Model ID
+  - name: ui_tars_baseURL
+    type: string
+    required: true
+    label:
+      en_US: UI-TARS Base URL
+      zh_Hans: UI-TARS 基础 URL
+      pt_BR: UI-TARS Base URL
+  - name: ui_tars_apiKey
+    type: string
+    required: false
+    label:
+      en_US: UI-TARS API Key (Environment Variables as String NOT Secret type)
+      zh_Hans: UI-TARS API 密钥 (环境变量 数据类型 ○ String  x Secret)
+      pt_BR: UI-TARS API Key (Environment Variables as String NOT Secret type)
+extra:
+  python:
+    source: strategies/mcpReAct-UI-TARS.py

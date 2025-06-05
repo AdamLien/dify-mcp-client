@@ -1,5 +1,5 @@
 # dify-mcp-client
-`MCP Client` as Agent Strategy Plugin.
+`MCP Client` as Agent Strategy Plugin with Computer Using Agent (UI-TARS-SDK) support.
 > [!IMPORTANT]
 > Dify is not `MCP Server` but `MCP Host`. 
 
@@ -35,6 +35,60 @@ Each `MCP client` (ReAct Agent) node can connect `MCP servers`.
 - Update python module and simplify its dependency (v0.0.4)
   - mcp(v1.1.2→v1.6.0+)
   - dify_plugin(0.0.1b72→v0.1.0)
+- Add UI-TARS SDK integration for GUI automation capabilities (v0.0.5)
+- Support Streamable HTTP MCP client
+
+## 🤖 UI-TARS Integration
+
+This plugin includes [UI-TARS SDK](https://github.com/bytedance/UI-TARS-desktop/blob/main/docs/sdk.md) integration for GUI automation capabilities.
+
+### Key Features
+- **On-demand GUI automation**: UI-TARS is called only when needed, reducing token consumption
+- **Life-time control**: Set maximum loop count per task to prevent runaway automation
+
+### Known Limitations
+- **Single Monitor Support**: UI-TARS currently recognizes only the primary monitor. Multi-monitor setups are not supported.
+- **Mac Retina Display Issue**: On macOS with Retina displays, UI-TARS requires the display resolution to be set to "Default" instead of the highest quality setting. Otherwise wrong (w,h) point is clicked. https://github.com/bytedance/UI-TARS-desktop/issues/591
+
+### Life-time Parameter
+The `life_time` parameter controls the maximum number of GUI actions UI-TARS can perform:
+- Default: 10 iterations
+- User-configurable maximum via `ui_tars_max_life_time_count`
+- Your selected LLM can dynamically adjust within the user-defined limit based on task complexity
+
+> [!NOTE]
+> Currently hardcoded to use UI-TARS-1.5-7B model for optimal cost-performance balance.
+
+## 🐳 Docker Deployment with Pre-built Node.js
+
+
+### Building the Docker Image
+
+Build the Docker image with Node.js support for stdio MCP and UI-TARS:
+
+```bash
+docker build -t dify-mcp-client:latest .
+```
+
+Or use our pre-built image:
+```yaml
+# In your docker-compose.yml
+services:
+  plugin-daemon:
+    image: memedayo/dify-plugin-daemon:latest  # Pre-built with Node.js
+    # ... rest of configuration
+```
+> [!IMPORTANT]
+> Node.js is essential for this plugin's core features. Without it, you lose TypeScript stdio MCP support and UI-TARS functionality.
+
+### UI-TARS Configuration
+
+For detailed UI-TARS setup, refer to the [UI-TARS Desktop deployment guide](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md).
+
+The plugin automatically configures UI-TARS as a tool within the ReAct loop. You only need to provide:
+- Hugging Face Inference Endpoint URL like 
+- API Key like (hf_xxxxx)
+- (Optional) Adjust `ui_tars_max_life_time_count` in agent parameters
 
 ## ⚠️ Caution and Limitation
 > [!CAUTION]
@@ -76,7 +130,8 @@ docker compose up -d
 ```
 Once this field is added, the Dify platform will allow the installation of all plugins that are not listed (and thus not verified) in the Dify Marketplace.
 > [!TIP]
-> Marketplace need Approval. If stars⭐ reach 100, I'll consider to make PR for them.
+> Marketplace need Approval. I'm preparing to make PR for them after refactoring. 
+> Perhaps I'll provide as a new plugin (UI-TARS-SDK as a Dify tool) separately
 
 ## Where does this plugin show up?
 - It takes few minutes to install
@@ -93,7 +148,7 @@ MCP Agent Plugin node require config_json like this to command or URL to connect
             "url": "http://host.docker.internal:8080/sse"
         },
         "name_of_server2":{
-            "url": "http://host.docker.internal:8008/sse"
+            "url": "http://host.docker.internal:8008/mcp"
         }
     }
 }
@@ -114,16 +169,23 @@ https://github.com/3dify-project/dify-mcp-client/tree/main/test/chatflow
 #### After download DSL(yml) file, import it in Dify and you can test MCP using "Everything MCP server"
 https://github.com/modelcontextprotocol/servers/tree/main/src/everything
 
-# How to convert `stdio` MCP server into SSE MCP server
+# How to convert stdio MCP server into Stremable HTTP (or SSE)
 ## option1️⃣: Edit MCP server's code
 If fastMCP server, change like this
 ```diff
 if __name__ == "__main__":
 -    mcp.run(transport="stdio")
-+    mcp.run(transport="sse")
++    mcp.run(transport="streamable-http")
 ```
 
 ## option2️⃣: via mcp-proxy
+> [!WARNNING]
+> Streamable HTTP is recommended instead of deprecated SSE
+> Following old SSE setup doesn't work. Read https://github.com/sparfenyuk/mcp-proxy instead.
+
+<details>
+<summary>SSE setup (NOT Streamable HTTP)</summary>
+
 ```
 \mcp-proxy>uv venv -p 3.12
 .venv\Scripts\activate
@@ -184,6 +246,8 @@ INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8080 (Press CTRL+C to quit)
 ```
+</details>
+
 
 # 🔨 How to develop and deploy plugin
 
@@ -191,7 +255,7 @@ INFO:     Uvicorn running on http://127.0.0.1:8080 (Press CTRL+C to quit)
 https://github.com/3dify-project/dify-mcp-client/blob/main/GUIDE.md
 
 ### Dify plugin SDK daemon
-If your OS is Windows and CPU is Intel or AMD, you need to download `dify-plugin-windows-amd64.exe` (v0.0.7)<br>
+If your OS is Windows and CPU is Intel or AMD, you need to download the latest `dify-plugin-windows-amd64.exe`<br>
 Choose your OS-compatible verson here:<br>
 https://github.com/langgenius/dify-plugin-daemon/releases <br>
 1. Rename it as dify.exe for convinence
@@ -223,6 +287,7 @@ Python3.12+ is compatible. The `venv` and `uv` are not necessary, but recommende
 uv venv -p 3.12
 .venv\Scripts\activate
 ```
+
 Install python modules for plugin development
 ```
 uv pip install -r requirements.txt

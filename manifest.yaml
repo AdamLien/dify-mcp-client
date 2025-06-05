@@ -1,4 +1,4 @@
-version: 0.0.4
+version: 0.0.5
 type: plugin
 author: 3dify-project
 name: mcp_client
@@ -8,10 +8,10 @@ label:
   zh_Hans: mcp_client
   pt_BR: mcp_client
 description:
-  en_US: Claude MCP Client as Dify plugin. This maintains 1:1 connections with MCP servers. By default, list of {tool, resource, prompt} on the server is passed to LLM. Dify is regarded as Host (not MCP server).
-  ja_JP: Claude MCP Client as Dify plugin. This maintains 1:1 connections with MCP servers. By default, list of {tool, resource, prompt} on the server is passed to LLM. Dify is regarded as Host (not MCP server).
-  zh_Hans: Claude MCP Client as Dify plugin. This maintains 1:1 connections with MCP servers. By default, list of {tool, resource, prompt} on the server is passed to LLM. Dify is regarded as Host (not MCP server).
-  pt_BR: Claude MCP Client as Dify plugin. This maintains 1:1 connections with MCP servers. By default, list of {tool, resource, prompt} on the server is passed to LLM. Dify is regarded as Host (not MCP server).
+  en_US: Claude MCP Client as Dify plugi (not MCP server). Use Node.js pre-installed container like memedayo/dify-plugin-daemon when using UI-TARS-SDK.
+  ja_JP: Claude MCP Client as Dify plugi (not MCP server). Use Node.js pre-installed container like memedayo/dify-plugin-daemon when using UI-TARS-SDK.
+  zh_Hans: Claude MCP Client as Dify plugi (not MCP server). Use Node.js pre-installed container like memedayo/dify-plugin-daemon when using UI-TARS-SDK.
+  pt_BR: Claude MCP Client as Dify plugi (not MCP server). Use Node.js pre-installed container like memedayo/dify-plugin-daemon when using UI-TARS-SDK.
 icon: icon.svg
 resource:
   memory: 268435456
@@ -37,7 +37,7 @@ plugins:
   agent_strategies:
     - provider/agent.yaml
 meta:
-  version: 0.0.4
+  version: 0.0.5
   arch:
     - amd64
     - arm64
