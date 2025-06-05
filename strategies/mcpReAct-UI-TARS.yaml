@@ -6,7 +6,7 @@ identity:
     zh_Hans: UI-TARS MCP ReAct Agent
     pt_BR: UI-TARS MCP ReAct Agent
 description:
-  en_US: Hybrid ReAct agent that can call local MCP servers and the UI-TARS GUI-Agent via TypeScript.  LLM selects MCP tools; when the tool name is `ui_tars`, a local GUIAgent is spawned with the parameters below.
+  en_US: Hybrid ReAct agent that can call local MCP servers and the UI-TARS GUI-Agent via TypeScript.
   zh_Hans: 基于 MCP 与 UI-TARS 的混合 ReAct Agent。
   pt_BR: Agente ReAct híbrido para MCP e UI-TARS.
 parameters:
@@ -60,16 +60,6 @@ parameters:
     default: 3
     min: 1
     max: 500
-  - name: ui_tars_max_life_time_count
-    type: number
-    required: false
-    label:
-      en_US: Max cap of UI-TARS Life-time count. LLM set limit lower maxLoopCount (parameter of GUIAgent UI-TARS-SDK) dynamically based on task complexity.
-      zh_Hans: UI-TARS 生命周期计数的最大上限。LLM 根据任务复杂程度动态设置 maxLoopCount（GUIAgent UI-TARS-SDK 参数）下限。
-      pt_BR:  Max cap of UI-TARS Life-time count. LLM set limit lower maxLoopCount (parameter of GUIAgent UI-TARS-SDK) dynamically based on task complexity.
-    default: 10
-    min: 1
-    max: 100
   - name: ui_tars_hf_model
     type: string
     required: false
@@ -92,6 +82,16 @@ parameters:
       en_US: UI-TARS API Key (Environment Variables as String NOT Secret type)
       zh_Hans: UI-TARS API 密钥 (环境变量 数据类型 ○ String  x Secret)
       pt_BR: UI-TARS API Key (Environment Variables as String NOT Secret type)
+  - name: ui_tars_max_life_time_count
+    type: number
+    required: false
+    label:
+      en_US: UI-TARS Life-time (cap of maxLoopCount).
+      zh_Hans: UI-TARS 生命周期最大上限。(maxLoopCount的上限）。
+      pt_BR: UI-TARS Life-time (cap of maxLoopCount).
+    default: 10
+    min: 1
+    max: 100
 extra:
   python:
     source: strategies/mcpReAct-UI-TARS.py
