@@ -79,9 +79,9 @@ parameters:
     type: string
     required: false
     label:
-      en_US: UI-TARS API Key (Environment Variables as String NOT Secret type)
+      en_US: UI-TARS API Key (Env Variable as String NOT Secret)
       zh_Hans: UI-TARS API 密钥 (环境变量 数据类型 ○ String  x Secret)
-      pt_BR: UI-TARS API Key (Environment Variables as String NOT Secret type)
+      pt_BR: UI-TARS API Key (Env Variable as String NOT Secret)
   - name: ui_tars_max_life_time_count
     type: number
     required: false
