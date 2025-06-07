@@ -1,0 +1,17 @@
+{
+  "name": "dify-mcp-client",
+  "version": "0.0.5",
+  "private": true,
+  "dependencies": {
+    "@ui-tars/sdk": "latest",
+    "@ui-tars/operator-nut-js": "latest",
+    "@ui-tars/shared": "latest",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0",
+    "@types/node": "^20.0.0",
+    "@types/yargs": "^17.0.0"
+  }
+}
