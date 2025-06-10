@@ -1366,7 +1366,7 @@ class mcpReActUITars(AgentStrategy):
         return "npx"
 
 
-    def _divide_tasks(self, p: mcpReActUITarsParams, query:str) -> list[str]: # 廃止
+    def _divide_tasks(self, p: mcpReActUITarsParams, query:str) -> list[str]: # deprecated
       """call manager-LLM to get an ordered list of atomic GUI steps"""
       plan_prompt = (
           "You are a planning agent. "
@@ -1412,36 +1412,54 @@ class mcpReActUITars(AgentStrategy):
         ]
         print(">>", " ".join(cmd))
 
-        proc = subprocess.run(cmd, capture_output=True, env=sub_env)
+        project_root = Path(__file__).parent.parent
 
-        """ debug (for Dify plugin's local deployment user) """
-        stdout_str = proc.stdout.decode('utf-8', errors='replace')
-        if proc.stderr:
-            stderr_str = proc.stderr.decode('utf-8', errors='replace')
-            print("\n=== STDERR (decoded) ===")
-            print(stderr_str or "(empty)")
-            print(f"\n=== EXIT CODE: {proc.returncode} ===")
-
-        """ log message for Dify and Manager LLM """
-        stdout_lines = stdout_str.splitlines()
-        # ignore lines unless start with '[UITarsModel]'
-        uitars_lines = [
-            line for line in stdout_lines
-            if line.lstrip().startswith('[UITarsModel]')
-        ]
-        filtered_stdout = '\n'.join(uitars_lines) or '(no UITarsModel output)'
-
-        if proc.returncode in [0, 100]: # return code is 100 if reached max Life-time
-            result = filtered_stdout
+        import platform
+        is_windows = platform.system() == "Windows"
         
-        # exception
-        else:
-            print(f"\n=== Subprocess exited with code: {proc.returncode} ===")
-            if not uitars_lines: # should return whole stdout and stderr? (64encoded image is too large...)
-                result = "stdout:\n" + stdout_str
-                result += "\n\nstderr:\n" + stderr_str
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=sub_env,
+            cwd=str(project_root),
+            text=True,
+            encoding="utf-8",   # avoid CP932 (windows decord error)
+            errors="replace",   # replace undecodable characters into '?'
+            bufsize=1,
+            shell=False,
+        )
 
-        return result
+        uitars_lines: list[str] = []
+
+        for line in proc.stdout:
+            if line.lstrip().startswith('screenshotBase64:'):
+                continue        # remove screenshot binary data from output
+            # elif 
+                # remove common log like system prompt (not Implemented yet)
+            uitars_lines.append(line.rstrip())
+            print(line, end='')
+
+        return_code = proc.wait()
+
+
+        if return_code in (0, 100, 101): 
+            # 100: reached max-loop -> return back to Manager LLM
+            body = '\n'.join(uitars_lines) or '(no UI-TARS output)'
+
+            # 101:  -> + stderr to Massage for Manager LLM
+            if return_code == 101:
+                err = proc.stderr.read().strip()
+                if err:
+                    body += '\n\n=== STDERR ===\n' + err
+            return body
+
+        else:
+            stderr_lines = proc.stderr.read().splitlines()
+            # stdout(- image) + stderr
+            body  = '\n'.join(uitars_lines)
+            body += '\n\n=== STDERR ===\n' + '\n'.join(stderr_lines)
+            return f"UI-TARS exited with code {return_code}\n{body}"
 
 
     def _create_ui_tars_tool_entity(self, life_time_max_cap: int) -> ToolEntity:
@@ -1457,9 +1475,9 @@ class mcpReActUITars(AgentStrategy):
 
         description = ToolDescription(
             human=I18nObject(en_US="Run the local UI-TARS GUI Agent."),
-            llm=f"Call this tool to invoke Computer Using Agent (VLM + automation library like nutjs). It can see screenshot and think what operation to do next given GUI tasks repeatedly."
+            llm=f"Call this tool to invoke Computer Using Agent (VLM + automation library like nutjs). It can see screenshot and think what operation to do next given GUI tasks repeatedly. Remember, UI-TARS have no persistent memory (only during Life-time), so you must give it all necessary information."
         )
-
+        # ToDo: these description should be moved to /prompt/template.py
         task_param = ToolParameter(
             name="task",
             label=I18nObject(en_US="Task"),
@@ -1476,7 +1494,7 @@ class mcpReActUITars(AgentStrategy):
                 *  'click "search" button',
                 However, UI-TARS is wise enough to think well and judge next task itself.
                 Therefore, if you're not sure what on the screen or predict state (page) transition, tell UI-TARS abstract task.
-                Then, UI-TARS will feedback.
+                Then, UI-TARS thoughts and action will feedback.
                 """,
             type="string",
             required=True,
