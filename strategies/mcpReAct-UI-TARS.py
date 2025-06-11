@@ -1407,7 +1407,10 @@ class mcpReActUITars(AgentStrategy):
 
         ts_file = Path(__file__).with_name("UI-TARS-SDK.ts")
         cmd = [
-            self._npx_command, "ts-node", "--transpile-only", str(ts_file),
+            self._npx_command,
+            "-p", "@ui-tars/sdk@latest",
+            "-p", "@ui-tars/operator-nut-js@latest",
+            "ts-node", "--transpile-only", str(ts_file),
             "--params", json.dumps(gui_agent_param_json, ensure_ascii=False)
         ]
         print(">>", " ".join(cmd))

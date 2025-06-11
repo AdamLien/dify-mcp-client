@@ -1,9 +1,8 @@
 // UI-TARS-SDK.ts
 /// <reference types="node" />
 
-import { GUIAgent } from '@ui-tars/sdk';
+import { GUIAgent, UITarsModelVersion } from '@ui-tars/sdk';
 import { NutJSOperator } from '@ui-tars/operator-nut-js';
-import { UITarsModelVersion } from '@ui-tars/shared/constants';
 import yargs from 'yargs/yargs';
 import { hideBin } from 'yargs/helpers';
 
