@@ -48,7 +48,7 @@ This plugin includes [UI-TARS SDK](https://github.com/bytedance/UI-TARS-desktop/
 > 
 > Normal difypkg install doesn't work. Because UI-TARS require OS native API, yet Dify plugin env is Linux docker container.
 > 
-> I'm thinking alternative solusion via HTTP Streamable MCP.
+> I'm thinking alternative solusion via Streamable HTTP MCP.
 ### Key Features
 - **On-demand GUI automation**: UI-TARS is called only when needed, reducing token consumption
 - **Life-time control**: Set maximum loop count per task to prevent runaway automation
@@ -161,9 +161,9 @@ MCP Agent Plugin node require config_json like this to command or URL to connect
 > [!WARNING]
 > - Each server's port number should be different, like 8080, 8008, ...
 > - If you want to use stdio mcp server, there are 3 ways.
->   1. Convert it to SSE mcp server https://github.com/3dify-project/dify-mcp-client/edit/main/README.md#how-to-convert-stdio-mcp-server-into-sse-mcp-server
+>   1. Convert it to Streamable HTTP mcp server using mcp-proxy https://github.com/sparfenyuk/mcp-proxy?tab=readme-ov-file#1-stdio-to-ssestreamablehttp
 >   2. Deploy with source code (**NOT** by .difypkg or GitHub reposity name install) https://github.com/3dify-project/dify-mcp-client/edit/main/README.md#-how-to-develop-and-deploy-plugin
->   3. Pre-install Node.js inside dify-plugin docker (issue:https://github.com/3dify-project/dify-mcp-client/issues/10) guide: https://github.com/tangyoha/tangyoha-bili/tree/master/dify/mcp/map_mcp
+>   3. Pre-install Node.js inside dify-plugin docker (Only TypeScript stdio server)
 
 ## Chatflow Example
 ![showcase2](./_assets/everything_mcp_server_test_resource.png)
