@@ -1,0 +1,321 @@
+app:
+  description: UI-TARS-SDK sample Chatflow. Only support Dify plugin's local debug
+    deployment (not difypkg).
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: advanced-chat
+  name: UI-TARS-SDK-Agent
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.3.0
+workflow:
+  conversation_variables:
+  - description: ''
+    id: a24809e2-09c0-468b-9c1b-a159c084cb48
+    name: abstract
+    selector:
+    - conversation
+    - abstract
+    value: []
+    value_type: array[string]
+  environment_variables:
+  - description: ''
+    id: b4becc47-4427-43a2-9cf5-6f1f54d3e12f
+    name: UI_TARS_API_KEY
+    selector:
+    - env
+    - UI_TARS_API_KEY
+    value: hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    value_type: string
+  - description: ''
+    id: cc255a7a-c31e-47d8-a4ea-6ef907a8fcfd
+    name: UI_TARS_BASE_URL
+    selector:
+    - env
+    - UI_TARS_BASE_URL
+    value: https://xxxxxxxxxxxxxxxxxxxx.aws.endpoints.huggingface.cloud
+    value_type: string
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: agent
+      id: 1749109352033-source-1749109365086-target
+      source: '1749109352033'
+      sourceHandle: source
+      target: '1749109365086'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: agent
+        targetType: assigner
+      id: 1749109365086-source-1749288433082-target
+      source: '1749109365086'
+      sourceHandle: source
+      target: '1749288433082'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: answer
+      id: 1749288433082-source-answer-target
+      source: '1749288433082'
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: Start
+        type: start
+        variables: []
+      height: 54
+      id: '1749109352033'
+      position:
+        x: 125.71819452888218
+        y: 282
+      positionAbsolute:
+        x: 125.71819452888218
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#1749109365086.text#}}'
+        desc: ''
+        selected: false
+        title: Answer
+        type: answer
+        variables: []
+      height: 104
+      id: answer
+      position:
+        x: 902.1981960431718
+        y: 282
+      positionAbsolute:
+        x: 902.1981960431718
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        agent_parameters:
+          config_json:
+            type: constant
+            value: "{\n  \"mcpServers\":{\n    \n  }\n}"
+          instruction:
+            type: constant
+            value: You are helpful Assistant.
+          maximum_iterations:
+            type: constant
+            value: 5
+          model:
+            type: constant
+            value:
+              completion_params: {}
+              mode: chat
+              model: anthropic/claude-3.7-sonnet
+              model_type: llm
+              provider: langgenius/openrouter/openrouter
+              type: model-selector
+          query:
+            type: constant
+            value: 'Chat history: {{#conversation.abstract#}}
+
+
+              USER query:{{#sys.query#}}'
+          tools:
+            type: constant
+            value: []
+          ui_tars_apiKey:
+            type: constant
+            value: '{{#env.UI_TARS_API_KEY#}}'
+          ui_tars_baseURL:
+            type: constant
+            value: '{{#env.UI_TARS_BASE_URL#}}'
+          ui_tars_max_life_time_count:
+            type: constant
+            value: 10
+        agent_strategy_label: UI-TARS MCP ReAct Agent
+        agent_strategy_name: mcpReAct-UI-TARS
+        agent_strategy_provider_name: 3dify-project/mcp_client/agent
+        desc: ''
+        output_schema: null
+        plugin_unique_identifier: 3dify-project/mcp_client:0.0.5@e713100eb37ef9ea2a0a97e97057127de23b07e4e2c2383141397a0561d3612b
+        selected: true
+        title: Agent
+        type: agent
+      height: 146
+      id: '1749109365086'
+      position:
+        x: 384.78026504730167
+        y: 282
+      positionAbsolute:
+        x: 384.78026504730167
+        y: 282
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        author: PCG-procedural3D-RAG
+        desc: ''
+        height: 114
+        selected: false
+        showAuthor: false
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"QUERY example 1","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textStyle":"font-size:
+          16px;","textFormat":0},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Invoke
+          UI-TARS. Task: find a WEB browser on the screen and search the GitHub repository
+          of UI-TARS-desktop. You should give these tasks all at once (not separately).","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1,"textStyle":"font-size:
+          16px;"}}'
+        theme: blue
+        title: ''
+        type: ''
+        width: 324
+      height: 114
+      id: '1749111682258'
+      position:
+        x: 384.78026504730167
+        y: 150.35659676230827
+      positionAbsolute:
+        x: 384.78026504730167
+        y: 150.35659676230827
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 324
+    - data:
+        author: PCG-procedural3D-RAG
+        desc: ''
+        height: 160
+        selected: false
+        showAuthor: false
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"font-size:
+          16px;","text":"QUERY example 2 (need Blender)","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textStyle":"font-size:
+          16px;","textFormat":0},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Invoke
+          UI-TARS. You should give following tasks.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"Task:
+          find a Blender window on the screen and delete cube and create a donut.
+          Then, change surface material to brown.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"-
+          Don''t use full screen mode.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"-
+          Do not close any chrome browser.","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1,"textStyle":"font-size:
+          16px;"}}'
+        theme: blue
+        title: ''
+        type: ''
+        width: 467
+      height: 160
+      id: '1749282820780'
+      position:
+        x: 384.78026504730167
+        y: 454.2901154872829
+      positionAbsolute:
+        x: 384.78026504730167
+        y: 454.2901154872829
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 467
+    - data:
+        desc: ''
+        items:
+        - input_type: variable
+          operation: append
+          value:
+          - sys
+          - query
+          variable_selector:
+          - conversation
+          - abstract
+          write_mode: over-write
+        - input_type: variable
+          operation: append
+          value:
+          - '1749109365086'
+          - text
+          variable_selector:
+          - conversation
+          - abstract
+          write_mode: over-write
+        selected: false
+        title: Append answer
+        type: assigner
+        version: '2'
+      height: 116
+      id: '1749288433082'
+      position:
+        x: 642.3646850556975
+        y: 282
+      positionAbsolute:
+        x: 642.3646850556975
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: -117.53190810341061
+      y: 76.19194285013327
+      zoom: 1.148698354997035
