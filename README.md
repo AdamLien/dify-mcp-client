@@ -42,9 +42,12 @@ Each `MCP client` (ReAct Agent) node can connect `MCP servers`.
 
 This plugin includes [UI-TARS SDK](https://github.com/bytedance/UI-TARS-desktop/blob/main/docs/sdk.md) integration for GUI automation capabilities.
 
-> [!WARNNING]
-> UI-TARS-SDK integration is supported only Dify Plugin's local debug deployment. https://github.com/3dify-project/dify-mcp-client#-how-to-develop-and-deploy-plugin
-> Normal difypkg install doesn't work. Because UI-TARS require OS native API, yet Dify plugin env is Linux docker container. 
+> [!WARNING]
+> UI-TARS-SDK integration is supported only Dify Plugin's local debug deployment.
+> https://github.com/3dify-project/dify-mcp-client#-how-to-develop-and-deploy-plugin
+> 
+> Normal difypkg install doesn't work. Because UI-TARS require OS native API, yet Dify plugin env is Linux docker container.
+> 
 > I'm thinking alternative solusion via HTTP Streamable MCP.
 ### Key Features
 - **On-demand GUI automation**: UI-TARS is called only when needed, reducing token consumption
@@ -69,7 +72,6 @@ The `life_time` parameter controls the maximum number of GUI actions UI-TARS can
 ### Building the Docker Image
 <details>
 <summary> This pulldown guide is for TypeScript stdio MCP server user</summary>
-Build the Docker image with Node.js support for stdio MCP:
 
 ```bash
 docker build -t dify-mcp-client:latest .
@@ -80,11 +82,10 @@ Or use our pre-built image:
 # In your docker-compose.yml
 services:
   plugin-daemon:
-    image: memedayo/dify-plugin-daemon:latest  # Pre-built with Node.js
+    image: memedayo/dify-plugin-daemon:latest  # with Pre-built Node.js
     # ... rest of configuration
 ```
-> [!IMPORTANT]
-> Without Node.js in container, you lose TypeScript stdio MCP support.
+Without Node.js in container, you lose TypeScript stdio MCP support.
 
 </details>
 
@@ -183,7 +184,7 @@ if __name__ == "__main__":
 ```
 
 ## option2️⃣: via mcp-proxy
-> [!WARNNING]
+> [!WARNING]
 > Streamable HTTP is recommended instead of deprecated SSE
 > Following old SSE setup doesn't work. Read https://github.com/sparfenyuk/mcp-proxy instead.
 
