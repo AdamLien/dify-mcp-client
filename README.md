@@ -92,8 +92,8 @@ services:
 
 For detailed UI-TARS setup, refer to the [UI-TARS Desktop deployment guide](https://github.com/bytedance/UI-TARS/blob/main/README_deploy.md).
 
-The plugin automatically configures UI-TARS as a tool within the ReAct loop. You only need to provide:
-- Hugging Face Inference Endpoint URL like 
+The plugin automatically configures UI-TARS as a tool within the ReAct loop. You need to provide:
+- Hugging Face Inference Endpoint URL
 - API Key like (hf_xxxxx)
 - (Optional) Adjust `ui_tars_max_life_time_count` in agent parameters
 
@@ -295,6 +295,11 @@ uv venv -p 3.12
 Install python modules for plugin development
 ```
 uv pip install -r requirements.txt
+```
+
+For only UI-TARS-SDK user (after installing Node.js v22 LTS)
+```
+npm install
 ```
 
 ### Duplicate `env.example` and rename one to `.env`
