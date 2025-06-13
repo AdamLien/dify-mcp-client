@@ -42,12 +42,16 @@ Each `MCP client` (ReAct Agent) node can connect `MCP servers`.
 
 This plugin includes [UI-TARS SDK](https://github.com/bytedance/UI-TARS-desktop/blob/main/docs/sdk.md) integration for GUI automation capabilities.
 
+> [!WARNNING]
+> UI-TARS-SDK integration is supported only Dify Plugin's local debug deployment. https://github.com/3dify-project/dify-mcp-client#-how-to-develop-and-deploy-plugin
+> Normal difypkg install doesn't work. Because UI-TARS require OS native API, yet Dify plugin env is Linux docker container. 
+> I'm thinking alternative solusion via HTTP Streamable MCP.
 ### Key Features
 - **On-demand GUI automation**: UI-TARS is called only when needed, reducing token consumption
 - **Life-time control**: Set maximum loop count per task to prevent runaway automation
 
 ### Known Limitations
-- **Single Monitor Support**: UI-TARS currently recognizes only the primary monitor. Multi-monitor setups are not supported.
+- **Single Monitor Support**: UI-TARS currently recognizes the primary monitor only. Multi-monitor setups are not supported.
 - **Mac Retina Display Issue**: On macOS with Retina displays, UI-TARS requires the display resolution to be set to "Default" instead of the highest quality setting. Otherwise wrong (w,h) point is clicked. https://github.com/bytedance/UI-TARS-desktop/issues/591
 
 ### Life-time Parameter
@@ -63,8 +67,9 @@ The `life_time` parameter controls the maximum number of GUI actions UI-TARS can
 
 
 ### Building the Docker Image
-
-Build the Docker image with Node.js support for stdio MCP and UI-TARS:
+<details>
+<summary> This pulldown guide is for TypeScript stdio MCP server user</summary>
+Build the Docker image with Node.js support for stdio MCP:
 
 ```bash
 docker build -t dify-mcp-client:latest .
@@ -79,7 +84,9 @@ services:
     # ... rest of configuration
 ```
 > [!IMPORTANT]
-> Node.js is essential for this plugin's core features. Without it, you lose TypeScript stdio MCP support and UI-TARS functionality.
+> Without Node.js in container, you lose TypeScript stdio MCP support.
+
+</details>
 
 ### UI-TARS Configuration
 
@@ -129,9 +136,6 @@ docker compose down
 docker compose up -d
 ```
 Once this field is added, the Dify platform will allow the installation of all plugins that are not listed (and thus not verified) in the Dify Marketplace.
-> [!TIP]
-> Marketplace need Approval. I'm preparing to make PR for them after refactoring. 
-> Perhaps I'll provide as a new plugin (UI-TARS-SDK as a Dify tool) separately
 
 ## Where does this plugin show up?
 - It takes few minutes to install

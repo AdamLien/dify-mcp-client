@@ -1352,6 +1352,10 @@ class mcpReActUITars(AgentStrategy):
         """Check available npx command in the OS"""
         import platform
         import shutil
+
+        env_path = os.getenv("NPX_PATH")
+        if env_path and shutil.which(env_path):
+            return env_path
         
         if platform.system() == "Windows":
             npx_cmd = shutil.which("npx.cmd")
@@ -1362,8 +1366,6 @@ class mcpReActUITars(AgentStrategy):
         if npx_cmd:
             return "npx"
         
-        print("Warnning: npx command couldn't be resolved. UI-TARS-SDK will use default 'npx'.")
-        return "npx"
 
 
     def _divide_tasks(self, p: mcpReActUITarsParams, query:str) -> list[str]: # deprecated
@@ -1408,8 +1410,6 @@ class mcpReActUITars(AgentStrategy):
         ts_file = Path(__file__).with_name("UI-TARS-SDK.ts")
         cmd = [
             self._npx_command,
-            "-p", "@ui-tars/sdk@latest",
-            "-p", "@ui-tars/operator-nut-js@latest",
             "ts-node", "--transpile-only", str(ts_file),
             "--params", json.dumps(gui_agent_param_json, ensure_ascii=False)
         ]
