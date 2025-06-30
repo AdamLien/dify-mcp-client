@@ -1,2 +1,2 @@
-dify_plugin>=0.1.0
+dify-plugin>=0.3.0
 mcp>=1.6.0
